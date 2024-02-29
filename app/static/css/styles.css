@@ -1,0 +1,93 @@
+body {
+  display: flex;
+  font-family: 'Arial', sans-serif;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  flex-direction: column;
+  color: #abaaaa;
+  text-align: center;
+  min-height: 100vh;
+  background: linear-gradient(to bottom, #040624, #012e2e);
+}
+
+main {
+  max-width: 800px;
+  padding: 20px;
+  background-color: #fff;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+}
+footer {
+  background: linear-gradient(to top, #040624, #012e2e);
+  color: #404040;
+  text-align: center;
+  padding: 10px;
+  margin-top: auto;
+}
+h1, h2 {
+  color: #007bff;
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+}
+
+li {
+  margin-bottom: 10px;
+}
+
+a {
+  text-decoration: none;
+  color: #008080;
+  font-weight: bold;
+}
+
+a:hover {
+  color: #0056b3;
+}
+
+img {
+  border-radius: 5px;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+}
+
+header {
+  background: linear-gradient(to top, #040624, #012e2e);
+  color: #fff;
+  padding: 10px;
+  text-align: center;
+}
+
+nav ul {
+  list-style: none;
+  padding: 0;
+  display: flex;
+}
+
+nav li {
+  margin-right: 4%;
+}
+
+nav a {
+  text-decoration: none;
+  color: #fff;
+  font-weight: bold;
+}
+
+nav a:hover {
+  color: #f0f0f0; 
+}
+
+.page-number-container {
+  display: flex;
+  justify-content: center;
+  flex-direction: row;
+}
+
+.page-number-link {
+  display: inline-block;
+  margin-right: 10px;
+  /* Your other styles here */
+}

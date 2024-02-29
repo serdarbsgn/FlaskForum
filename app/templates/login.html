@@ -1,31 +1,38 @@
 <html>
-  <head>
-    <title>User Login</title>
-  </head>
-  <body>
-    {% with messages = get_flashed_messages() %}
-    {% if messages %}
-    <ul class=flashes>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Login</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+
+<body>
+  {% with messages = get_flashed_messages() %}
+  {% if messages %}
+  <ul class=flashes>
     {% for message in messages %}
-      <li>{{ message }}</li>
+    <li>{{ message }}</li>
     {% endfor %}
-    </ul>
-    {% endif %}
-    {% endwith %}
-    <h1>User Login</h1>
-    <form method="POST" action="{{ url_for('login') }}">
-      {{ form.csrf_token }}
-      {{ form.username.label }} {{ form.username }}
-      {% for error in form.username.errors %}
-        <span style="color: red;">[{{ error }}]</span>
-      {% endfor %}
-      <br>
-      {{ form.password.label }} {{ form.password }}
-      {% for error in form.password.errors %}
-        <span style="color: red;">[{{ error }}]</span>
-      {% endfor %}
-      <br>
-      <input type="submit" value="Login">
-    </form>
-  </body>
+  </ul>
+  {% endif %}
+  {% endwith %}
+  <h1>User Login</h1>
+  <form method="POST" action="{{ url_for('login') }}">
+    {{ form.csrf_token }}
+    {{ form.username.label }} {{ form.username }}
+    {% for error in form.username.errors %}
+    <span style="color: red;">[{{ error }}]</span>
+    {% endfor %}
+    <br>
+    {{ form.password.label }} {{ form.password }}
+    {% for error in form.password.errors %}
+    <span style="color: red;">[{{ error }}]</span>
+    {% endfor %}
+    <br>
+    <input type="submit" value="Login">
+  </form>
+  {% include 'footer.html' %}
+</body>
+
 </html>

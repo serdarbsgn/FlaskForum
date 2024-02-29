@@ -1,6 +1,9 @@
 <html>
   <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ contents.name }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
   </head>
   <body>
     {% with messages = get_flashed_messages() %}
@@ -12,7 +15,7 @@
     </ul>
     {% endif %}
     {% endwith %}
-
+    {% include 'header.html' %}
     <h1> Welcome to {{ contents.name }} forum</h1>
     <p>{{ contents.description }}</p>
     <p>Created at: {{ contents.created_at }}</p>
@@ -28,13 +31,16 @@
     </li>
   {% endfor %}
 </ul>
+<div class="page-number-container">
 {% for i in range(0, postcount + 1) %}
 {% if i == page %}
-    <span>{{ i }}</span>
+    <span class="page-number-link">{{ i }}</span>
 {% else %}
-    <a href="{{ url_for('forum_page', id=contents.id,page=i) }}">{{ i }}</a>
+    <a class="page-number-link" href="{{ url_for('forum_page', id=contents.id,page=i) }}">{{ i }}</a>
 {% endif %}
 {% endfor %}
+</div>
+{% include 'footer.html' %}
 </body>
 </html>
 <a href="/forums">Back to Forum List</a>

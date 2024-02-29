@@ -1,43 +1,45 @@
 <!doctype html>
 <html>
-  <head>
-    <title>Forum List</title>
-  </head>
-  <body>
-    {% with messages = get_flashed_messages() %}
-    {% if messages %}
-    <ul class=flashes>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Forums List</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+
+<body>
+  
+  {% with messages = get_flashed_messages() %}
+  {% if messages %}
+  <ul class=flashes>
     {% for message in messages %}
-      <li>{{ message }}</li>
+    <li>{{ message }}</li>
     {% endfor %}
-    </ul>
-    {% endif %}
-    {% endwith %}
-
-    {% if user %}
-      <h1>{{ user }}</h1>
-      <img src="{{ url_for('static', filename=picture) }}" alt="{{ user }}" style="width: 120px; height: 180px;">
-      <li><a href=# onclick="window.open('/create/forum', 'newwindow', 'height=300,width=300'); return false;"> Create Forum</a></li>
-    {% else %}
-      <a href="/login">Login</a>
-    {% endif %}
-
-    <h1>Forum List</h1>
-    <ul>
-      {% for forum in forums %}
-        <li>
-          <a href= {{forum.link}} > {{ forum.name }}</a>
-          <p>{{ forum.description }}</p>
-          <p>Created at: {{ forum.created_at }}</p>
-        </li>
-      {% endfor %}
-    </ul>
+  </ul>
+  {% endif %}
+  {% endwith %}
+  {% include 'header.html' %}
+  <h1>Forum List</h1>
+  <ul>
+    {% for forum in forums %}
+    <li>
+      <a href={{forum.link}}> {{ forum.name }}</a>
+      <p>{{ forum.description }}</p>
+      <p>Created at: {{ forum.created_at }}</p>
+    </li>
+    {% endfor %}
+  </ul>
+  <div class="page-number-container">
     {% for i in range(0, page_count + 1) %}
-    {% if i == page %}
-        <span>{{ i }}</span>
-    {% else %}
-        <a href="{{ url_for('forums_page', page=i) }}">{{ i }}</a>
-    {% endif %}
-{% endfor %}
-  </body>
+      {% if i == page %}
+        <span class="page-number-link">{{ i }}</span>
+      {% else %}
+        <a href="{{ url_for('forums_page', page=i) }}" class="page-number-link">{{ i }}</a>
+      {% endif %}
+    {% endfor %}
+  </div>
+  {% include 'footer.html' %}
+</body>
+
 </html>

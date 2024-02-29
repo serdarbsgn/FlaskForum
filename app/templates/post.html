@@ -1,20 +1,30 @@
 <html>
-  <head>
-    <title>{{ contents.title }}</title>
-  </head>
-  <body>
-    {% with messages = get_flashed_messages() %}
-    {% if messages %}
-    <ul class=flashes>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ contents.title }}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+
+<body>
+  
+  {% with messages = get_flashed_messages() %}
+  {% if messages %}
+  <ul class=flashes>
     {% for message in messages %}
-      <li>{{ message }}</li>
+    <li>{{ message }}</li>
     {% endfor %}
-    </ul>
-    {% endif %}
-    {% endwith %}
-    
-    <h1>{{ contents.title }}</h1>
-    <p>{{ contents.content }}</p>
-    <p>Created at: {{ contents.created_at }}</p>
-    <p>Created by: {{ created_by }}</p>
-    <p>Updated at: {{ contents.updated_at }}</p>
+  </ul>
+  {% endif %}
+  {% endwith %}
+  {% include 'header.html' %}
+  <h1>{{ contents.title }}</h1>
+  <p>{{ contents.content }}</p>
+  <p>Created at: {{ contents.created_at }}</p>
+  <p>Created by: {{ created_by }}</p>
+  <p>Updated at: {{ contents.updated_at }}</p>
+  {% include 'footer.html' %}
+</body>
+
+</html>
