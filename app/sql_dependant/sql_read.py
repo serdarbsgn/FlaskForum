@@ -42,3 +42,10 @@ class Select():
     
     def post_page(data):
         return select(Post.id,Post.user_id,Post.title,Post.content,Post.created_at,Post.updated_at).where(Post.id == data)
+    
+    def comments(data):
+        return select(Comment.id,Comment.parent_id,User.username,Comment.content,Comment.created_at,Comment.updated_at).join(User,Comment.user_id == User.id).where(
+            Comment.post_id == data["id"]).limit(100).offset(data["page"]*100).order_by(Comment.id)
+    
+    def comments_count(data):
+        return select(count(Comment.id)).where(Comment.post_id==data)

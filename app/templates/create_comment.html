@@ -2,15 +2,18 @@
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create Post</title>
+    <title>Create Comment</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
   <body>
-<form id = form method="POST" action="{{ url_for('create_post') }}">
+<form id = form method="POST" action="{{ url_for('create_comment') }}">
     {{ form.csrf_token }}
-    {{ form.forum_id(value=forumid) }}
-    {{ form.title.label }} {{ form.title }}
+    {{ form.post_id(value=postid) }}
+    {{ form.comment_id (value=commentid) }}
     {{ form.content.label }} {{ form.content }}
     <input type="submit" value="Create">
+    <script>document.getElementById("form").addEventListener("submit", function() {
+        window.opener.location.reload();
+      });</script>
 </form>
 </body>

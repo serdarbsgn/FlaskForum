@@ -1,9 +1,9 @@
 from asyncio import sleep
 import uuid
-from app.flaskforms import CreateForumForm, CreatePostForm, RegisterForm,LoginForm,AddProfilePicture
-from flask import redirect, url_for,render_template,session,flash,request
+from app.flaskforms import CreateCommentForm, CreateForumForm, CreatePostForm, RegisterForm,LoginForm,AddProfilePicture
+from flask import jsonify, redirect, url_for,render_template,session,flash,request,escape
 from app.sql_dependant.sql_read import Select
-from app.sql_dependant.sql_tables import Forum, Post, User
+from app.sql_dependant.sql_tables import Comment, Forum, Post, User
 from app.sql_dependant.sql_connection import sqlconn
 from app.sql_dependant.sql_write import Update
 from app.utils import generate_hash
@@ -17,7 +17,7 @@ def register():
     form = RegisterForm()
     if form.validate_on_submit():
         user = User(
-            username=form.username._value(),
+            username=escape(form.username._value()),
             email=form.email._value(),
             password=generate_hash(form.password._value()))
         sql = sqlconn()
@@ -142,6 +142,15 @@ def forum_page():
         post["link"] = "post?id="+str(post["id"])
     postcount = sql.session.execute(Select.posts_count(id)).mappings().fetchone()
     postcount = (postcount["count"]-1)//10
+    if "user" in session:
+        user = sql.session.execute(Select.user_username({"id":session["user"]})).mappings().fetchone()
+        if "username" in user:
+            user = user["username"]
+        picture = sql.session.execute(Select.user_profile_picture({"user":user})).mappings().fetchone()
+        if picture["profile_picture"] is None:
+            picture = {"profile_picture": "pp.jpg"}
+        sql.close()
+        return render_template('forum.html',user=user,contents = contents,posts = posts,postcount=postcount)
     sql.close()
     return render_template('forum.html',contents = contents,posts = posts,postcount=postcount)
 
@@ -155,9 +164,21 @@ def post_page():
         pagenumber = request.args.get("page",0,type=int)
     sql = sqlconn()
     contents = sql.session.execute(Select.post_page(id)).mappings().fetchone()
+    comments = listify(sql.session.execute(Select.comments({"id":id,"page":pagenumber})).mappings().fetchall())
+    comment_count = sql.session.execute(Select.comments_count(id)).mappings().fetchone()
+    comment_count = (comment_count["count"]-1)//100
     created_by = sql.session.execute(Select.user_username({"id":contents["user_id"]})).mappings().fetchone()["username"]
+    if "user" in session:
+        user = sql.session.execute(Select.user_username({"id":session["user"]})).mappings().fetchone()
+        if "username" in user:
+            user = user["username"]
+        picture = sql.session.execute(Select.user_profile_picture({"user":user})).mappings().fetchone()
+        if picture["profile_picture"] is None:
+            picture = {"profile_picture": "pp.jpg"}
+        sql.close()
+        return render_template('post.html',user=user,contents = contents,created_by = created_by,comments=comments,comment_count=comment_count)
     sql.close()
-    return render_template('post.html',contents = contents,created_by = created_by)
+    return render_template('post.html',contents = contents,created_by = created_by,comments=comments,comment_count=comment_count)
 
 @app.route('/forums', methods=['GET'])
 def forums_page():
@@ -196,8 +217,8 @@ def create_forum():
             sql.close()
             return("Error."),400
         forum = Forum(
-            name=form.name._value(),
-            description=form.description._value())
+            name=escape(form.name._value()),
+            description=escape(form.description._value()))
         check = sql.session.execute(Select.forum_exists(form.name._value())).mappings().fetchall()
         if len(check)>0:
             sql.close()
@@ -206,7 +227,7 @@ def create_forum():
         sql.session.commit()
         sql.close()
         flash('Forum added successfully!')
-        return """<script>window.close();</script>"""
+        return """<script>window.close();window.opener.location.reload();</script>"""
     return render_template('create_forum.html', form=form)
 
 @app.route('/create/post',methods=['GET','POST'])
@@ -222,27 +243,47 @@ def create_post():
         sql = sqlconn()
         post = Post(
             user_id = session["user"],
-            forum_id = form.forum_id._value(),
-            title=form.title._value(),
-            content=form.content._value())
+            forum_id = escape(form.forum_id._value()),
+            title=escape(form.title._value()),
+            content=escape(form.content._value()))
         sql.session.add(post)
         sql.session.commit()
         sql.close()
         flash('Post added successfully!')
-        return """<script>window.close();</script>"""
+        return """<script>window.close();window.opener.location.reload();</script>"""
     return render_template('create_post.html', form=form,forumid=forumid)
 
+@app.route('/create/comment',methods=['GET','POST'])
+def create_comment():
+    if request.args.get("postid"):
+        postid = request.args.get("postid",type=int)
+        if request.args.get("commentid"):
+            commentid = request.args.get("commentid",type=int)
+        else: commentid = 0
+        form = CreateCommentForm(post_id = postid,comment_id = commentid)
+    if "post_id" in request.form and "comment_id" in request.form:
+        form = CreateCommentForm(post_id = int(request.form["post_id"]),comment_id = int(request.form["comment_id"]))
+    if form.validate_on_submit():
+        if "user" not in session:
+            return redirect(url_for('login'))
+        sql = sqlconn()
+        comment = Comment(
+            user_id = session["user"],
+            parent_id = form.comment_id._value(),
+            post_id =escape(form.post_id._value()),
+            content=escape(form.content._value()))
+        sql.session.add(comment)
+        sql.session.commit()
+        sql.close()
+        flash('Comment added successfully!')
+        return """<script>window.close();window.opener.location.reload();</script>"""
+    return render_template('create_comment.html', form=form,postid=postid,commentid=commentid)
 
 def redirect(link):
     return '<script>window.location.href = "'+link+'";</script>'
 
 def open_window(link):
     return '<script>window.open("'+link+'", "newwindow", "height=300,width=500");</script>'
-
-
-
-
-
 
 def listify(map):
     templist = []

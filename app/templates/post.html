@@ -8,7 +8,7 @@
 </head>
 
 <body>
-  
+
   {% with messages = get_flashed_messages() %}
   {% if messages %}
   <ul class=flashes>
@@ -24,6 +24,79 @@
   <p>Created at: {{ contents.created_at }}</p>
   <p>Created by: {{ created_by }}</p>
   <p>Updated at: {{ contents.updated_at }}</p>
+
+  </div>
+  <div id="comments-container" class="comments-container"></div>
+  <script>
+    // Convert Python list to JSON string
+    const postid = {{contents.id}}
+    const comments = {{ comments| tojson }};
+    console.log(comments)
+    // Parse JSON string to JavaScript array
+    //const parsedComments = JSON.parse(comments);
+    const parsedComments = comments;
+    const commentsContainer = document.getElementById('comments-container');
+
+    function displayComments(commentList, indent = 0) {
+      commentList.forEach(comment => {
+        const commentElement = document.createElement('div');
+
+        // Set the ID of the div to commentId
+        commentElement.id = `comment-${comment.id}`;
+
+        if (comment.parent_id !== 0) {
+          // If parent_id exists, append as child to the corresponding parent
+          const parentContainer = document.getElementById(`comment-${comment.parent_id}`);
+          parentContainer.appendChild(commentElement);
+
+          // Get the indent of the parent and add 20 to it
+          const parentIndent = parseInt(parentContainer.style.marginLeft || 0, 10);
+          commentElement.style.marginLeft = `${parentIndent + 40}px`;
+
+          // Display the comment text for child comments
+          commentElement.innerHTML = `
+                  <strong class="reply-text">${comment.content}</strong> - <i class="username">${comment.username}</i> <div class="timestamp">${comment.created_at}</div>   
+              `;
+        } else {
+          // If no parent_id, use black text
+          commentElement.innerHTML = `
+                  <strong class="comment-text">${comment.content}</strong> - <i class="username">${comment.username}</i> <div class="timestamp">${comment.created_at}</div>
+              `;
+          // Set the left margin for comments without a parent
+          commentElement.style.marginLeft = `${indent * 40}px`; // Adjust the indentation as needed
+          commentsContainer.appendChild(commentElement);
+        }
+        const replyLink = document.createElement('a');
+        replyLink.href = '#'; // You can set the actual link or action for replying
+        replyLink.textContent = 'Reply';
+        replyLink.classList.add('reply-link');
+
+        // Set onclick event to open a new window
+        replyLink.onclick = function () {
+          const url = '/create/comment'; // Replace with your actual endpoint
+          const params = `postid=${postid}&commentid=${comment.id}`;
+          window.open(`${url}?${params}`, 'newwindow', 'height=300,width=300');
+          return false;
+        };
+        commentElement.appendChild(replyLink);
+      });
+    }
+
+    // Initial call to display the comments
+    displayComments(parsedComments);
+  </script>
+  <div class="page-number-container">
+    {% for i in range(0, comment_count + 1) %}
+    {% if i == page %}
+    <span class="page-number-link">{{ i }}</span>
+    {% else %}
+    <a class="page-number-link" href="{{ url_for('post_page', id=contents.id,page=i) }}">{{ i }}</a>
+    {% endif %}
+    {% endfor %}
+  </div>
+  <a href="#"
+    onclick="window.open('{{url_for('create_comment' , postid=contents.id)}}', 'newwindow', 'height=300,width=300'); return false;">Create
+    a Comment</a>
   {% include 'footer.html' %}
 </body>
 
