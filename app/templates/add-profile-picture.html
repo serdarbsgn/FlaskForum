@@ -1,0 +1,22 @@
+<html>
+  <head>
+    <title>Add Profile Picture</title>
+  </head>
+  <body>
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    <ul class=flashes>
+    {% for message in messages %}
+      <li>{{ message }}</li>
+    {% endfor %}
+    </ul>
+    {% endif %}
+    {% endwith %}
+    <h1>Add Profile Picture</h1>
+    <form id = form action="{{ url_for('add_profile_picture') }}" method="post" enctype="multipart/form-data">
+      {{ form.csrf_token }}<br>
+      {{ form.photo.label }} {{ form.photo }}<br>
+      <input type="submit" value="Add Profile Picture">
+    </form>
+  </body>
+</html>

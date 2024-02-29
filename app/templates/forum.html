@@ -1,0 +1,40 @@
+<html>
+  <head>
+    <title>{{ contents.name }}</title>
+  </head>
+  <body>
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    <ul class=flashes>
+    {% for message in messages %}
+      <li>{{ message }}</li>
+    {% endfor %}
+    </ul>
+    {% endif %}
+    {% endwith %}
+
+    <h1> Welcome to {{ contents.name }} forum</h1>
+    <p>{{ contents.description }}</p>
+    <p>Created at: {{ contents.created_at }}</p>
+
+<a href="#" onclick="window.open('{{url_for('create_post' , forumid=contents.id)}}', 'newwindow', 'height=300,width=300'); return false;">Create a Post</a>
+
+<h1>Posts List</h1>
+<ul>
+  {% for post in posts %}
+    <li>
+      <a href= {{post.link}} > {{ post.title }}</a>
+      <p>Created at: {{ post.created_at }}</p>
+    </li>
+  {% endfor %}
+</ul>
+{% for i in range(0, postcount + 1) %}
+{% if i == page %}
+    <span>{{ i }}</span>
+{% else %}
+    <a href="{{ url_for('forum_page', id=contents.id,page=i) }}">{{ i }}</a>
+{% endif %}
+{% endfor %}
+</body>
+</html>
+<a href="/forums">Back to Forum List</a>

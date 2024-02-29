@@ -1,0 +1,19 @@
+.products-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-gap: 20px;
+  }
+  
+  .product-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  
+  .product-item img {
+    width: 200px;
+    height: 200px;
+    object-fit: cover;
+  }
+  

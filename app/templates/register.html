@@ -1,0 +1,25 @@
+<html>
+  <head>
+    <title>User Registration</title>
+  </head>
+  <body>
+    <h1>User Registration</h1>
+    <form method="POST" action="{{ url_for('register') }}">
+      {{ form.csrf_token }}
+      {{ form.username.label }} {{ form.username }}
+      {% for error in form.username.errors %}
+        <span style="color: red;">[{{ error }}]</span>
+      {% endfor %}
+      <br>
+      {{ form.email.label }} {{ form.email }}
+      {% for error in form.email.errors %}
+        <span style="color: red;">[{{ error }}]</span>
+      {% endfor %}
+      <br>
+      {{ form.password.label }} {{ form.password }}
+      {% for error in form.password.errors %}
+        <span style="color: red;">[{{ error }}]</span>
+      {% endfor %}
+      <br>
+      <input type="submit" value="Register">
+    </form

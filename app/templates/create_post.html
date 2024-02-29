@@ -1,0 +1,17 @@
+<html>
+  <head>
+    <title>Create Post
+    </title>
+  </head>
+  <body>
+<form id = form method="POST" action="{{ url_for('create_post') }}">
+    {{ form.csrf_token }}
+    {{ form.forum_id(value=forumid) }}
+    {{ form.title.label }} {{ form.title }}
+    {{ form.content.label }} {{ form.content }}
+    <input type="submit" value="Create">
+    <script>document.getElementById("form").addEventListener("submit", function() {
+        window.opener.location.reload();
+      });</script>
+</form>
+</body>

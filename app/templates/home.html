@@ -1,0 +1,35 @@
+<html>
+  <head>
+    <title>Welcome to My App</title>
+  </head>
+  <body>
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    <ul class=flashes>
+    {% for message in messages %}
+      <li>{{ message }}</li>
+    {% endfor %}
+    </ul>
+    {% endif %}
+    {% endwith %}
+    
+    {% if user %}
+      <h1>Welcome {{ user }}</h1>
+      <img src="{{ url_for('static', filename=picture) }}" alt="{{ user }}" style="width: 120px; height: 180px;">
+    {% else %}
+      <h1>Welcome</h1>
+    {% endif %}
+    <ul>
+      <li><a href="/forums">Forum</a></li>
+      {% if user %}
+      <li><a href=# onclick="window.open('/add-profile-picture', 'newwindow', 'height=300,width=300'); return false;"> Add profile picture</a></li>
+      <li><a href="/remove-profile-picture">Remove profile picture</a></li>
+      <li><a href="/logout">Logout</a></li>
+      {% else %}
+      <li><a href="/login">Login</a></li>
+      <li><a href="/register">Register</a></li>
+      {% endif %}
+      
+    </ul>
+  </body>
+</html>
