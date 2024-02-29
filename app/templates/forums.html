@@ -39,6 +39,7 @@
       {% endif %}
     {% endfor %}
   </div>
+  <a href="#" onclick="window.open('{{url_for('create_forum')}}', 'newwindow', 'height=300,width=300'); return false;">Create a Forum</a>
   {% include 'footer.html' %}
 </body>
 
