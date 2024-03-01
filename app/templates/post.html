@@ -28,16 +28,13 @@
   </div>
   <div id="comments-container" class="comments-container"></div>
   <script>
-    // Convert Python list to JSON string
+
     const postid = {{contents.id}}
     const comments = {{ comments| tojson }};
-    console.log(comments)
-    // Parse JSON string to JavaScript array
-    //const parsedComments = JSON.parse(comments);
     const parsedComments = comments;
     const commentsContainer = document.getElementById('comments-container');
 
-    function displayComments(commentList, indent = 0) {
+    function displayComments(commentList,replyMargin=20) {
       commentList.forEach(comment => {
         const commentElement = document.createElement('div');
 
@@ -49,31 +46,26 @@
           const parentContainer = document.getElementById(`comment-${comment.parent_id}`);
           parentContainer.appendChild(commentElement);
 
-          // Get the indent of the parent and add 20 to it
-          const parentIndent = parseInt(parentContainer.style.marginLeft || 0, 10);
-          commentElement.style.marginLeft = `${parentIndent + 40}px`;
-
+          commentElement.style.marginLeft = `${replyMargin}px`;
           // Display the comment text for child comments
           commentElement.innerHTML = `
                   <strong class="reply-text">${comment.content}</strong> - <i class="username">${comment.username}</i> <div class="timestamp">${comment.created_at}</div>   
               `;
         } else {
-          // If no parent_id, use black text
+          // If no parent_id, use lighter text
           commentElement.innerHTML = `
                   <strong class="comment-text">${comment.content}</strong> - <i class="username">${comment.username}</i> <div class="timestamp">${comment.created_at}</div>
               `;
-          // Set the left margin for comments without a parent
-          commentElement.style.marginLeft = `${indent * 40}px`; // Adjust the indentation as needed
           commentsContainer.appendChild(commentElement);
         }
         const replyLink = document.createElement('a');
-        replyLink.href = '#'; // You can set the actual link or action for replying
+        replyLink.href = '#';
         replyLink.textContent = 'Reply';
         replyLink.classList.add('reply-link');
 
         // Set onclick event to open a new window
         replyLink.onclick = function () {
-          const url = '/create/comment'; // Replace with your actual endpoint
+          const url = '/create/comment';
           const params = `postid=${postid}&commentid=${comment.id}`;
           window.open(`${url}?${params}`, 'newwindow', 'height=300,width=300');
           return false;
