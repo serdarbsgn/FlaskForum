@@ -99,6 +99,14 @@ nav a:hover {
 .reply-text{
   color: #989898;
 }
+.reply-link{
+  font-size: small;
+  color: #008585;
+}
+.show-replies-link{
+  font-size: smaller;
+  color: #006666;
+}
 .comment-text{
   color: #f0f0f0;
 }

@@ -166,7 +166,7 @@ def post_page():
     contents = sql.session.execute(Select.post_page(id)).mappings().fetchone()
     comments = listify(sql.session.execute(Select.comments({"id":id,"page":pagenumber})).mappings().fetchall())
     comment_count = sql.session.execute(Select.comments_count(id)).mappings().fetchone()
-    comment_count = (comment_count["count"]-1)//100
+    comment_count = (comment_count["count"]-1)//20
     created_by = sql.session.execute(Select.user_username({"id":contents["user_id"]})).mappings().fetchone()["username"]
     if "user" in session:
         user = sql.session.execute(Select.user_username({"id":session["user"]})).mappings().fetchone()
@@ -179,6 +179,16 @@ def post_page():
         return render_template('post.html',user=user,contents = contents,created_by = created_by,comments=comments,comment_count=comment_count)
     sql.close()
     return render_template('post.html',contents = contents,created_by = created_by,comments=comments,comment_count=comment_count)
+
+@app.route('/fetch/replies',methods=['GET'])
+def fetch_replies():
+    if request.args.get("postid") and request.args.get("commentid"):
+        parent_id = request.args.get("commentid",0,type=int)
+        post_id = request.args.get("postid",0,type=int)
+    sql = sqlconn()
+    replies = listify(sql.session.execute(Select.replies_of_comment({"post_id":post_id,"parent_id":parent_id})).mappings().fetchall())
+    sql.close()
+    return replies
 
 @app.route('/forums', methods=['GET'])
 def forums_page():

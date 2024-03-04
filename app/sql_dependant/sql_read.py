@@ -1,5 +1,6 @@
 import uuid
-from sqlalchemy import  delete, func, select, update,desc,not_
+from sqlalchemy import  delete, func, select, update,desc,not_,exists
+from sqlalchemy.orm import aliased
 from sqlalchemy.dialects.mysql import insert
 from app.sql_dependant.sql_tables import *
 from sqlalchemy.sql.functions import coalesce,concat,count
@@ -44,8 +45,16 @@ class Select():
         return select(Post.id,Post.user_id,Post.title,Post.content,Post.created_at,Post.updated_at).where(Post.id == data)
     
     def comments(data):
-        return select(Comment.id,Comment.parent_id,User.username,Comment.content,Comment.created_at,Comment.updated_at).join(User,Comment.user_id == User.id).where(
-            Comment.post_id == data["id"]).limit(100).offset(data["page"]*100).order_by(Comment.id)
+        CommentAlias = aliased(Comment)
+        return select(Comment.id,Comment.parent_id,User.username,Comment.content,Comment.created_at,Comment.updated_at,exists().where(CommentAlias.parent_id == Comment.id
+            ).label('has_replies')).join(User,Comment.user_id == User.id).where(
+            Comment.post_id == data["id"],Comment.parent_id == 0).limit(20).offset(data["page"]*20).order_by(Comment.id)
     
     def comments_count(data):
-        return select(count(Comment.id)).where(Comment.post_id==data)
+        return select(count(Comment.id)).where(Comment.post_id==data,Comment.parent_id == 0)
+    
+    def replies_of_comment(data):
+        CommentAlias = aliased(Comment)
+        return select(Comment.id,Comment.parent_id,User.username,Comment.content,Comment.created_at,Comment.updated_at,exists().where(CommentAlias.parent_id == Comment.id
+            ).label('has_replies')).join(User,Comment.user_id == User.id).where(
+            Comment.post_id == data["post_id"],Comment.parent_id == data["parent_id"]).order_by(Comment.id)
