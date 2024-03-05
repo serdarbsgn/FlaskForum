@@ -116,3 +116,15 @@ nav a:hover {
 .username{
   color: #747474;
 }
+.like-count{
+  font-size: smaller;
+  color: #6000ce;
+}
+.like-link{
+  font-size: smaller;
+  color: #00440e;
+}
+.dislike-link{
+  font-size: smaller;
+  color: #440000;
+}

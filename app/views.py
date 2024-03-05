@@ -1,11 +1,13 @@
 from asyncio import sleep
 import uuid
+
+import MySQLdb
 from app.flaskforms import CreateCommentForm, CreateForumForm, CreatePostForm, RegisterForm,LoginForm,AddProfilePicture
 from flask import jsonify, redirect, url_for,render_template,session,flash,request,escape
 from app.sql_dependant.sql_read import Select
-from app.sql_dependant.sql_tables import Comment, Forum, Post, User
+from app.sql_dependant.sql_tables import Comment, CommentLikes, Forum, Post, User
 from app.sql_dependant.sql_connection import sqlconn
-from app.sql_dependant.sql_write import Update
+from app.sql_dependant.sql_write import Delete, Update
 from app.utils import generate_hash
 from PIL import Image
 from . import app
@@ -189,6 +191,62 @@ def fetch_replies():
     replies = listify(sql.session.execute(Select.replies_of_comment({"post_id":post_id,"parent_id":parent_id})).mappings().fetchall())
     sql.close()
     return replies
+
+@app.route('/comment/like',methods=['GET'])
+def like_comment():
+    if "user" not in session:
+        flash("Log in first")
+        return """"<script>window.reload();""",401
+    if request.args.get("commentid"):
+        user_id = session["user"]
+        comment_id = request.args.get("commentid",0,type=int)
+    if type(user_id) is not int and type(comment_id) is not int:
+        flash("Failed to like")
+        return "Failed to like",401
+    sql = sqlconn()
+    like = CommentLikes(
+        user_id = escape(user_id),
+        comment_id = escape(comment_id)
+    )
+    try:
+        sql.session.add(like)
+        sql.session.commit()
+    except:
+        flash("Already Liked")
+        sql.session.rollback()
+        sql.close()
+        return """<script>window.reload();""",401
+    sql.session.execute(Update.user_like_comment({"comment_id":comment_id}))
+    sql.session.commit()
+    sql.close()
+    flash("Liked successfully")
+    return """<script>window.reload();""",200
+
+@app.route('/comment/dislike',methods=['GET'])
+def dislike_comment():
+    if "user" in session and request.args.get("commentid"):
+        user_id = session["user"]
+        comment_id = request.args.get("commentid",0,type=int)
+    if type(user_id) is not int and type(comment_id) is not int:
+        flash("Failed to dislike")
+        return """<script>window.reload();""",401
+    sql = sqlconn()
+    like = CommentLikes(
+        user_id = escape(user_id),
+        comment_id = escape(comment_id)
+    )
+    try:
+        sql.session.add(like)
+        sql.session.commit()
+    except:
+        sql.session.rollback()
+        sql.session.execute(Update.user_dislike_comment({"comment_id":comment_id}))
+        flash("Disliked successfully")
+    finally:
+        sql.session.execute(Delete.user_dislike_comment({"user_id":user_id,"comment_id":comment_id}))
+        sql.session.commit()
+        sql.close()
+    return """<script>window.reload();""",200
 
 @app.route('/forums', methods=['GET'])
 def forums_page():

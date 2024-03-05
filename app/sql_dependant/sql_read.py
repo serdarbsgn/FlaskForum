@@ -46,7 +46,7 @@ class Select():
     
     def comments(data):
         CommentAlias = aliased(Comment)
-        return select(Comment.id,Comment.parent_id,User.username,Comment.content,Comment.created_at,Comment.updated_at,exists().where(CommentAlias.parent_id == Comment.id
+        return select(Comment.id,Comment.parent_id,User.username,Comment.content,Comment.likes,Comment.created_at,Comment.updated_at,exists().where(CommentAlias.parent_id == Comment.id,Comment.post_id == data["id"]
             ).label('has_replies')).join(User,Comment.user_id == User.id).where(
             Comment.post_id == data["id"],Comment.parent_id == 0).limit(20).offset(data["page"]*20).order_by(Comment.id)
     
@@ -55,6 +55,6 @@ class Select():
     
     def replies_of_comment(data):
         CommentAlias = aliased(Comment)
-        return select(Comment.id,Comment.parent_id,User.username,Comment.content,Comment.created_at,Comment.updated_at,exists().where(CommentAlias.parent_id == Comment.id
-            ).label('has_replies')).join(User,Comment.user_id == User.id).where(
-            Comment.post_id == data["post_id"],Comment.parent_id == data["parent_id"]).order_by(Comment.id)
+        return select(Comment.id,Comment.parent_id,User.username,Comment.content,Comment.likes,Comment.created_at,Comment.updated_at,exists().where(CommentAlias.parent_id == Comment.id,Comment.post_id == data["post_id"]
+           ).label('has_replies')).join(User,Comment.user_id == User.id).where(
+           Comment.post_id == data["post_id"],Comment.parent_id == data["parent_id"]).order_by(Comment.id)

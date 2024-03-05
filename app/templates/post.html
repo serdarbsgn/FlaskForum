@@ -28,7 +28,7 @@
   </div>
   <div id="comments-container" class="comments-container"></div>
   <script>
-
+    
     const postid = {{ contents.id }}
     const comments = {{ comments| tojson }};
     const parsedComments = comments;
@@ -37,7 +37,6 @@
     function displayComments(commentList, replyMargin = 20) {
       commentList.forEach(comment => {
         const commentElement = document.createElement('div');
-
         // Set the ID of the div to commentId
         commentElement.id = `comment-${comment.id}`;
 
@@ -64,7 +63,6 @@
         replyLink.href = '#';
         replyLink.textContent = 'Reply';
         replyLink.classList.add('reply-link');
-
         // Set onclick event to open a new window
         replyLink.onclick = function () {
           const url = '/create/comment';
@@ -73,6 +71,38 @@
           return false;
         };
         commentElement.appendChild(replyLink);
+
+        const likeLink = document.createElement('a');
+        likeLink.href = '#';
+        likeLink.textContent = ' Like';
+        likeLink.classList.add('like-link');
+        // Set onclick event to open a new window
+        likeLink.onclick = function () {
+          const url = '/comment/like';
+          const params = `postid=${postid}&commentid=${comment.id}`;
+          fetch(`${url}?${params}`);
+          return false;
+        };
+        commentElement.appendChild(likeLink);
+
+        const likesSpan = document.createElement('span');
+        likesSpan.textContent = `\t${comment.likes} Likes`;
+        likesSpan.classList.add('like-count');
+        commentElement.appendChild(likesSpan);
+
+        const dislikeLink = document.createElement('a');
+        dislikeLink.href = '#';
+        dislikeLink.textContent = ' Dislike';
+        dislikeLink.classList.add('dislike-link');
+        // Set onclick event to open a new window
+        dislikeLink.onclick = function () {
+          const url = '/comment/dislike';
+          const params = `postid=${postid}&commentid=${comment.id}`;
+          fetch(`${url}?${params}`);
+          return false;
+        };
+        commentElement.appendChild(dislikeLink);
+
         if (comment.has_replies === true) {
           const lineBreak = document.createElement('br');
           commentElement.appendChild(lineBreak);
