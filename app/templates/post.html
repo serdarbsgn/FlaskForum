@@ -24,7 +24,7 @@
   <p>Created at: {{ contents.created_at }}</p>
   <p>Created by: {{ created_by }}</p>
   <p>Updated at: {{ contents.updated_at }}</p>
-
+  <a href="#" onclick="window.open('{{url_for('update_post' , postid=contents.id)}}', 'newwindow', 'height=300,width=300'); return false;">Update this Post</a>
   </div>
   <div id="comments-container" class="comments-container"></div>
   <script>

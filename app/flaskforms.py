@@ -30,3 +30,9 @@ class CreateCommentForm(FlaskForm):
     comment_id = HiddenField()
     content = TextAreaField('Content', validators=[DataRequired()])
     submit = SubmitField('Post')
+
+class UpdatePostForm(FlaskForm):
+    post_id = HiddenField()
+    title = StringField('Title', validators=[DataRequired()])
+    content = TextAreaField('Content', validators=[DataRequired()])
+    submit = SubmitField('Post')

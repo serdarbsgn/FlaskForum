@@ -2,7 +2,7 @@ from asyncio import sleep
 import uuid
 
 import MySQLdb
-from app.flaskforms import CreateCommentForm, CreateForumForm, CreatePostForm, RegisterForm,LoginForm,AddProfilePicture
+from app.flaskforms import CreateCommentForm, CreateForumForm, CreatePostForm, RegisterForm,LoginForm,AddProfilePicture, UpdatePostForm
 from flask import jsonify, redirect, url_for,render_template,session,flash,request,escape
 from app.sql_dependant.sql_read import Select
 from app.sql_dependant.sql_tables import Comment, CommentLikes, Forum, Post, User
@@ -320,6 +320,28 @@ def create_post():
         flash('Post added successfully!')
         return """<script>window.close();window.opener.location.reload();</script>"""
     return render_template('create_post.html', form=form,forumid=forumid)
+
+@app.route('/update/post',methods=['GET','POST'])
+def update_post():
+    if request.args.get("postid"):
+        postid = request.args.get("postid",type=int)
+        sql = sqlconn()
+        original_post = sql.session.execute(Select.post_page(postid)).mappings().fetchone()
+        sql.close()
+        form = UpdatePostForm(post_id = postid,title = original_post["title"],content = original_post["content"])
+    if "post_id" in request.form:
+        form = UpdatePostForm(post_id = int(request.form["post_id"]))
+    if form.validate_on_submit():
+        if "user" not in session:
+            return redirect(url_for('login'))
+        sql = sqlconn()
+        sql.session.execute(Update.post({"user_id":session["user"],"post_id":escape(form.post_id._value()),
+                                         "title":escape(form.title._value()),"content":escape(form.content._value())}))
+        sql.session.commit()
+        sql.close()
+        flash("Updated")
+        return """<script>window.close();window.opener.location.reload();</script>"""
+    return render_template('update_post.html', form=form,postid=postid)
 
 @app.route('/create/comment',methods=['GET','POST'])
 def create_comment():

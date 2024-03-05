@@ -14,6 +14,8 @@ class Insert():
     
 class Update():
     
+    def post(data):
+        return update(Post).where(Post.id == data["post_id"],Post.user_id  == data["user_id"]).values(title = data["title"],content = data["content"],updated_at = datetime.now())
     def user(data):
         statement = update(User).where(User)
         return statement
