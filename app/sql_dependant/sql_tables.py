@@ -48,3 +48,4 @@ class CommentLikes(Base):
     __tablename__ = "comment_likes"
     user_id = Column(Integer, ForeignKey('users.id'), nullable=False, primary_key=True)
     comment_id = Column(Integer, ForeignKey('comments.id'), nullable=False, primary_key=True)
+    l_d = Column(String(7),default = "Like")

@@ -6,7 +6,8 @@ from app.sql_dependant.sql_tables import *
 from sqlalchemy.sql.functions import coalesce,concat,count
 
 class Select():
-
+    def commentlikes_exists(data):
+        return select(CommentLikes.l_d).where(CommentLikes.user_id == data["user_id"],CommentLikes.comment_id == data["comment_id"])
     def user_unique_username_email(data):
         statement = select(User.id).where((User.username == data["username"]) | (User.email == data["email"]))
         return statement

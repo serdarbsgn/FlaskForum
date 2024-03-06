@@ -204,26 +204,36 @@ def like_comment():
         flash("Failed to like")
         return "Failed to like",401
     sql = sqlconn()
+    check_l_d_exists = sql.session.execute(Select.commentlikes_exists({"user_id":user_id,"comment_id":comment_id})).mappings().fetchone()
+    if check_l_d_exists:
+        if check_l_d_exists["l_d"] == "Like":
+            sql.session.execute(Delete.commentlikes({"user_id":user_id,"comment_id":comment_id,"l_d":"Like"}))
+            sql.session.execute(Update.comment_user_dislike_comment({"comment_id":comment_id}))
+            sql.session.commit()
+            flash("Unliked")
+            sql.close()
+            return """<script>window.reload();</script>""",200
+        elif check_l_d_exists["l_d"] == "Dislike":
+            sql.session.execute(Delete.commentlikes({"user_id":user_id,"comment_id":comment_id,"l_d":"Dislike"}))
+            sql.session.execute(Update.comment_user_like_comment({"comment_id":comment_id}))
+            sql.session.commit()
     like = CommentLikes(
         user_id = escape(user_id),
-        comment_id = escape(comment_id)
+        comment_id = escape(comment_id),
+        l_d = "Like"
     )
-    try:
-        sql.session.add(like)
-        sql.session.commit()
-    except:
-        flash("Already Liked")
-        sql.session.rollback()
-        sql.close()
-        return """<script>window.reload();""",401
-    sql.session.execute(Update.user_like_comment({"comment_id":comment_id}))
+    sql.session.add(like)
+    sql.session.execute(Update.comment_user_like_comment({"comment_id":comment_id}))
     sql.session.commit()
+    flash("Liked")
     sql.close()
-    flash("Liked successfully")
-    return """<script>window.reload();""",200
+    return """<script>window.reload();</script>""",200
 
 @app.route('/comment/dislike',methods=['GET'])
 def dislike_comment():
+    if "user" not in session:
+        flash("Log in first")
+        return """"<script>window.reload();""",401
     if "user" in session and request.args.get("commentid"):
         user_id = session["user"]
         comment_id = request.args.get("commentid",0,type=int)
@@ -231,22 +241,30 @@ def dislike_comment():
         flash("Failed to dislike")
         return """<script>window.reload();""",401
     sql = sqlconn()
+    check_l_d_exists = sql.session.execute(Select.commentlikes_exists({"user_id":user_id,"comment_id":comment_id})).mappings().fetchone()
+    if check_l_d_exists:
+        if check_l_d_exists["l_d"] == "Like":
+            sql.session.execute(Delete.commentlikes({"user_id":user_id,"comment_id":comment_id,"l_d":"Like"}))
+            sql.session.execute(Update.comment_user_dislike_comment({"comment_id":comment_id}))
+            sql.session.commit()
+        elif check_l_d_exists["l_d"] == "Dislike":
+            sql.session.execute(Delete.commentlikes({"user_id":user_id,"comment_id":comment_id,"l_d":"Dislike"}))
+            sql.session.execute(Update.comment_user_like_comment({"comment_id":comment_id}))
+            sql.session.commit()
+            flash("Undisliked")
+            sql.close()
+            return """<script>window.reload();</script>""",200
     like = CommentLikes(
         user_id = escape(user_id),
-        comment_id = escape(comment_id)
+        comment_id = escape(comment_id),
+        l_d = "Dislike"
     )
-    try:
-        sql.session.add(like)
-        sql.session.commit()
-    except:
-        sql.session.rollback()
-        sql.session.execute(Update.user_dislike_comment({"comment_id":comment_id}))
-        flash("Disliked successfully")
-    finally:
-        sql.session.execute(Delete.user_dislike_comment({"user_id":user_id,"comment_id":comment_id}))
-        sql.session.commit()
-        sql.close()
-    return """<script>window.reload();""",200
+    sql.session.add(like)
+    sql.session.execute(Update.comment_user_dislike_comment({"comment_id":comment_id}))
+    sql.session.commit()
+    flash("Disliked")
+    sql.close()
+    return """<script>window.reload();</script>""",200
 
 @app.route('/forums', methods=['GET'])
 def forums_page():
