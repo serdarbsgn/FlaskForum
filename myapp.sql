@@ -25,6 +25,7 @@ DROP TABLE IF EXISTS `comment_likes`;
 CREATE TABLE `comment_likes` (
   `user_id` int NOT NULL,
   `comment_id` int NOT NULL,
+  `l_d` enum('Like','Dislike') DEFAULT 'Like',
   UNIQUE KEY `uc_unique` (`user_id`,`comment_id`),
   KEY `comment_id` (`comment_id`),
   CONSTRAINT `comment_likes_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
@@ -92,7 +93,7 @@ CREATE TABLE `posts` (
   KEY `user_id` (`user_id`),
   CONSTRAINT `posts_ibfk_1` FOREIGN KEY (`forum_id`) REFERENCES `forums` (`id`) ON DELETE CASCADE,
   CONSTRAINT `posts_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=28 DEFAULT CHARSET=utf8mb3;
+) ENGINE=InnoDB AUTO_INCREMENT=29 DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -124,4 +125,4 @@ CREATE TABLE `users` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-03-05 20:35:51
+-- Dump completed on 2024-03-06 16:11:43
