@@ -74,6 +74,24 @@ CREATE TABLE `forums` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `post_likes`
+--
+
+DROP TABLE IF EXISTS `post_likes`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `post_likes` (
+  `user_id` int NOT NULL,
+  `post_id` int NOT NULL,
+  `l_d` enum('Like','Dislike') DEFAULT 'Like',
+  UNIQUE KEY `uc_unique` (`user_id`,`post_id`),
+  KEY `post_id` (`post_id`),
+  CONSTRAINT `post_likes_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `post_likes_ibfk_2` FOREIGN KEY (`post_id`) REFERENCES `posts` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `posts`
 --
 
@@ -86,6 +104,7 @@ CREATE TABLE `posts` (
   `user_id` int NOT NULL,
   `title` varchar(255) NOT NULL,
   `content` text NOT NULL,
+  `likes` int DEFAULT '0',
   `created_at` datetime NOT NULL,
   `updated_at` datetime NOT NULL,
   PRIMARY KEY (`id`),
@@ -125,4 +144,4 @@ CREATE TABLE `users` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-03-06 16:11:43
+-- Dump completed on 2024-03-06 17:54:13
