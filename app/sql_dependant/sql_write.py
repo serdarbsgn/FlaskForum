@@ -26,7 +26,15 @@ class Update():
     
     def comment_user_dislike_comment(data):
         return update(Comment).where(Comment.id == data["comment_id"]).values(likes = Comment.likes - 1)
+    
+    def post_user_like_post(data):
+        return update(Post).where(Post.id == data["post_id"]).values(likes = Post.likes + 1)
+    
+    def post_user_dislike_post(data):
+        return update(Post).where(Post.id == data["post_id"]).values(likes = Post.likes - 1)
 
 class Delete():
     def commentlikes(data):
         return delete(CommentLikes).where(CommentLikes.user_id == data["user_id"],CommentLikes.comment_id==data["comment_id"],CommentLikes.l_d==data["l_d"])
+    def postlikes(data):
+        return delete(PostLikes).where(PostLikes.user_id == data["user_id"],PostLikes.post_id == data["post_id"],PostLikes.l_d==data["l_d"])

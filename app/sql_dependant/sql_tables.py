@@ -30,6 +30,7 @@ class Post(Base):
     user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
     title = Column(String(255), nullable=False)
     content = Column(Text)
+    likes = Column(Integer,default = 0)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow)
 
@@ -48,4 +49,10 @@ class CommentLikes(Base):
     __tablename__ = "comment_likes"
     user_id = Column(Integer, ForeignKey('users.id'), nullable=False, primary_key=True)
     comment_id = Column(Integer, ForeignKey('comments.id'), nullable=False, primary_key=True)
+    l_d = Column(String(7),default = "Like")
+
+class PostLikes(Base):
+    __tablename__ = "post_likes"
+    user_id = Column(Integer, ForeignKey('users.id'), nullable=False, primary_key=True)
+    post_id = Column(Integer, ForeignKey('posts.id'), nullable=False, primary_key=True)
     l_d = Column(String(7),default = "Like")

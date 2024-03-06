@@ -8,6 +8,10 @@ from sqlalchemy.sql.functions import coalesce,concat,count
 class Select():
     def commentlikes_exists(data):
         return select(CommentLikes.l_d).where(CommentLikes.user_id == data["user_id"],CommentLikes.comment_id == data["comment_id"])
+    
+    def postlikes_exists(data):
+        return select(PostLikes.l_d).where(PostLikes.user_id == data["user_id"],PostLikes.post_id == data["post_id"])
+    
     def user_unique_username_email(data):
         statement = select(User.id).where((User.username == data["username"]) | (User.email == data["email"]))
         return statement
@@ -43,7 +47,7 @@ class Select():
         return select(count(Post.id)).where(Post.forum_id==data)
     
     def post_page(data):
-        return select(Post.id,Post.user_id,Post.title,Post.content,Post.created_at,Post.updated_at).where(Post.id == data)
+        return select(Post.id,Post.user_id,Post.title,Post.content,Post.likes,Post.created_at,Post.updated_at).where(Post.id == data)
     
     def comments(data):
         CommentAlias = aliased(Comment)
