@@ -25,10 +25,14 @@
   <p>Created by: {{ created_by }}</p>
   <p>Updated at: {{ contents.updated_at }}</p>
   <p>Likes: {{contents.likes}}</p>
+  {% if user and user==created_by%}
   <a href="#" onclick="window.open('{{url_for('update_post' , postid=contents.id)}}', 'newwindow', 'height=300,width=300'); return false;">Update this Post</a>
+  {% endif %}
   <a href="#" onclick="fetch('{{ url_for('like_post', postid=contents.id) }}').then(response => {location.reload();})">Like this post</a>
   <a href="#" onclick="fetch('{{ url_for('dislike_post', postid=contents.id) }}').then(response => {location.reload();})">Dislike this post</a>
-  
+  {% if user and user==created_by%}
+  <a href="#" onclick="fetch('{{ url_for('delete_post', postid=contents.id) }}').then(response => {location.replace('{{url_for('forum_page',id=contents.forum_id)}}');})">Delete this post</a>
+  {% endif %}
 </div>
   <div id="comments-container" class="comments-container"></div>
   <script>
@@ -83,8 +87,7 @@
         likeLink.onclick = function () {
           const url = '/comment/like';
           const params = `postid=${postid}&commentid=${comment.id}`;
-          fetch(`${url}?${params}`);
-          return false;
+          fetch(`${url}?${params}`).then(response => {location.reload();});
         };
         commentElement.appendChild(likeLink);
 
@@ -101,11 +104,25 @@
         dislikeLink.onclick = function () {
           const url = '/comment/dislike';
           const params = `postid=${postid}&commentid=${comment.id}`;
-          fetch(`${url}?${params}`);
-          return false;
+          fetch(`${url}?${params}`).then(response => {location.reload();});
         };
         commentElement.appendChild(dislikeLink);
+        {% if user %}
+        if (comment.username === '{{user}}'){
+          const deleteLink = document.createElement('a');
+          deleteLink.href = '#';
+          deleteLink.textContent = ' Delete';
+          deleteLink.classList.add('delete-link');
+          // Set onclick event to open a new window
+          deleteLink.onclick = function () {
+            const url = '{{url_for('delete_comment')}}';
+            const params = `commentid=${comment.id}`;
+            fetch(`${url}?${params}`).then(response => {location.reload();});
 
+          };
+          commentElement.appendChild(deleteLink);
+        }
+        {% endif %}
         if (comment.has_replies === true) {
           const lineBreak = document.createElement('br');
           commentElement.appendChild(lineBreak);

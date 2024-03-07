@@ -33,6 +33,31 @@ def create_comment():
         return """<script>window.close();window.opener.location.reload();</script>"""
     return render_template('create_comment.html', form=form,postid=postid,commentid=commentid)
 
+@app.route('/delete/comment',methods=['GET'])
+def delete_comment():
+    if "user" not in session:
+        flash("Log in first")
+        return """<script>window.reload();""",401
+    if request.args.get("commentid"):
+        user_id = session["user"]
+        comment_id = request.args.get("commentid",0,type=int)
+    if type(user_id) is not int and type(comment_id) is not int:
+        flash("Failed to delete")
+        return "Failed to delete",401
+    sql = sqlconn()
+    check_comment_exists = sql.session.execute(Select.comment(comment_id)).mappings().fetchone()
+    if not check_comment_exists:
+        flash("Failed to delete")
+        return "Failed to delete",401
+    if not (check_comment_exists["user_id"] == user_id):
+        flash("Can't delete a comment someone else created.")
+        return "Can't delete a comment someone else created.",401
+    sql.session.execute(Delete.comment({"user_id":user_id,"comment_id":comment_id}))
+    sql.session.commit()
+    sql.close()
+    flash("Deleted comment")
+    return "Deleted comment",200
+
 @app.route('/fetch/replies',methods=['GET'])
 def fetch_replies():
     if request.args.get("postid") and request.args.get("commentid"):

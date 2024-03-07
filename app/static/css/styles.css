@@ -128,3 +128,7 @@ nav a:hover {
   font-size: smaller;
   color: #440000;
 }
+.delete-link{
+  font-size: smaller;
+  color: #9e0000;
+}

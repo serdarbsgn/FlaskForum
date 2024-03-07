@@ -47,7 +47,10 @@ class Select():
         return select(count(Post.id)).where(Post.forum_id==data)
     
     def post_page(data):
-        return select(Post.id,Post.user_id,Post.title,Post.content,Post.likes,Post.created_at,Post.updated_at).where(Post.id == data)
+        return select(Post.id,Post.forum_id,Post.user_id,Post.title,Post.content,Post.likes,Post.created_at,Post.updated_at).where(Post.id == data)
+    
+    def comment(data):
+        return select(Comment.id,Comment.parent_id,Comment.user_id,Comment.content,Comment.likes,Comment.created_at,Comment.updated_at).where(Comment.id == data)
     
     def comments(data):
         CommentAlias = aliased(Comment)

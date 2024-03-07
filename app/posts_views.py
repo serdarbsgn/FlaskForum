@@ -17,6 +17,8 @@ def post_page():
         pagenumber = request.args.get("page",0,type=int)
     sql = sqlconn()
     contents = sql.session.execute(Select.post_page(id)).mappings().fetchone()
+    if not contents:
+        return "This post doesn't exist",404
     comments = listify(sql.session.execute(Select.comments({"id":id,"page":pagenumber})).mappings().fetchall())
     comment_count = sql.session.execute(Select.comments_count(id)).mappings().fetchone()
     comment_count = (comment_count["count"]-1)//20
@@ -78,6 +80,31 @@ def update_post():
         return """<script>window.close();window.opener.location.reload();</script>"""
     return render_template('update_post.html', form=form,postid=postid)
 
+
+@app.route('/delete/post',methods=['GET'])
+def delete_post():
+    if "user" not in session:
+        flash("Log in first")
+        return """<script>window.reload();""",401
+    if request.args.get("postid"):
+        user_id = session["user"]
+        post_id = request.args.get("postid",0,type=int)
+    if type(user_id) is not int and type(post_id) is not int:
+        flash("Failed to delete")
+        return "Failed to delete",401
+    sql = sqlconn()
+    check_post_exists = sql.session.execute(Select.post_page(post_id)).mappings().fetchone()
+    if not check_post_exists:
+        flash("Failed to delete")
+        return "Failed to delete",401
+    if not (check_post_exists["user_id"] == user_id):
+        flash("Can't delete a post someone else created.")
+        return "Can't delete a post someone else created.",401
+    sql.session.execute(Delete.post({"user_id":user_id,"post_id":post_id}))
+    sql.session.commit()
+    sql.close()
+    flash("Deleted post")
+    return "Deleted post",200
 
 @app.route('/post/like',methods=['GET'])
 def like_post():
