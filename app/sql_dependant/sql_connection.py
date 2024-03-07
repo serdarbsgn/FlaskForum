@@ -4,6 +4,16 @@ from .. import sql_engine
 class sqlconn:
 
     def __init__(self):
+        self.init_call()
+
+    def __enter__(self):
+        self.init_call()
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.close()
+
+    def init_call(self):
         engine = sql_engine
         connection = engine.connect()
         connection = connection.execution_options(
@@ -12,6 +22,7 @@ class sqlconn:
 )
         self.session = Session(engine)
         self.connection = connection
+        
     def execute(self,query):
         try:
             self.session.execute(query)

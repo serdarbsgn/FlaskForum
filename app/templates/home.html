@@ -26,7 +26,13 @@
   {% else %}
   <h1>Welcome</h1>
   {% endif %}
-  </ul>
+  {% if user %}
+  <h2>Your stats</h2>
+  <h3># of Comments: {{stats.comment_count}}</h3>
+  <h3># of Posts: {{stats.post_count}}</h3>
+  <h3># of Comment Karma: {{stats.comment_karma}}</h3>
+  <h3># of Post Karma: {{stats.post_karma}}</h3>
+  {% endif %}
   {% include 'footer.html' %}
 </body>
 

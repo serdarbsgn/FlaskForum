@@ -15,24 +15,22 @@ def forum_page():
     pagenumber = 0
     if request.args.get("page"):
         pagenumber = request.args.get("page",0,type=int)
-    sql = sqlconn()
-    contents = sql.session.execute(Select.forum_page(id)).mappings().fetchone()
-    posts = listify(sql.session.execute(Select.posts({"id":id,"page":pagenumber})).mappings().fetchall())
-    for post in posts:
-        post["link"] = "post?id="+str(post["id"])
-    postcount = sql.session.execute(Select.posts_count(id)).mappings().fetchone()
-    postcount = (postcount["count"]-1)//10
-    if "user" in session:
-        user = sql.session.execute(Select.user_username({"id":session["user"]})).mappings().fetchone()
-        if "username" in user:
-            user = user["username"]
-        picture = sql.session.execute(Select.user_profile_picture({"user":user})).mappings().fetchone()
-        if picture["profile_picture"] is None:
-            picture = {"profile_picture": "pp.jpg"}
-        sql.close()
-        return render_template('forum.html',user=user,contents = contents,posts = posts,postcount=postcount)
-    sql.close()
-    return render_template('forum.html',contents = contents,posts = posts,postcount=postcount)
+    with sqlconn() as sql:
+        contents = sql.session.execute(Select.forum_page(id)).mappings().fetchone()
+        posts = listify(sql.session.execute(Select.posts({"id":id,"page":pagenumber})).mappings().fetchall())
+        for post in posts:
+            post["link"] = "post?id="+str(post["id"])
+        postcount = sql.session.execute(Select.posts_count(id)).mappings().fetchone()
+        postcount = (postcount["count"]-1)//10
+        if "user" in session:
+            user = sql.session.execute(Select.user_username({"id":session["user"]})).mappings().fetchone()
+            if "username" in user:
+                user = user["username"]
+            picture = sql.session.execute(Select.user_profile_picture({"user":user})).mappings().fetchone()
+            if picture["profile_picture"] is None:
+                picture = {"profile_picture": "pp.jpg"}
+            return render_template('forum.html',user=user,contents = contents,posts = posts,postcount=postcount)
+        return render_template('forum.html',contents = contents,posts = posts,postcount=postcount)
 
 
 @app.route('/forums', methods=['GET'])

@@ -19,15 +19,13 @@ def register():
             username=escape(form.username._value()),
             email=form.email._value(),
             password=generate_hash(form.password._value()))
-        sql = sqlconn()
-        check = sql.session.execute(Select.user_unique_username_email({"username":user.username,"email":user.email})).mappings().fetchall()
-        if len(check)>0:
-            sql.close()
-            return "Email and/or Username already exists",400
-        sql.session.add(user)
-        sql.session.commit()
-        sql.close()
-        return redirect(url_for('login'))
+        with sqlconn() as sql:
+            check = sql.session.execute(Select.user_unique_username_email({"username":user.username,"email":user.email})).mappings().fetchall()
+            if len(check)>0:
+                return "Email and/or Username already exists",400
+            sql.session.add(user)
+            sql.session.commit()
+            return redirect(url_for('login'))
     return render_template('register.html', form=form)
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -55,18 +53,22 @@ def logout():
 def home():
     if "user" in session:
         user =  session["user"]
-        sql = sqlconn()
-        user = sql.session.execute(Select.user_username({"id":user})).mappings().fetchone()
-        if "username" in user:
-            user = user["username"]
-        else:
-            sql.close()
-            return("Error."),400
-        picture = sql.session.execute(Select.user_profile_picture({"user":user})).mappings().fetchone()
-        if picture["profile_picture"] is None:
-            picture = {"profile_picture": "pp.jpg"}
-        sql.close()
-        return render_template('home.html',user=user, picture = profile_photos_dir+picture["profile_picture"])
+        with sqlconn() as sql:
+            user = sql.session.execute(Select.user_username({"id":user})).mappings().fetchone()
+            if "username" in user:
+                user = user["username"]
+            else:
+                return("Error."),400
+            picture = sql.session.execute(Select.user_profile_picture({"user":user})).mappings().fetchone()
+            user_scores = {
+                "comment_count":sql.session.execute(Select.user_comment_count({"user_id":session["user"]})).mappings().fetchone()["count"],
+                "post_count":sql.session.execute(Select.user_post_count({"user_id":session["user"]})).mappings().fetchone()["count"],
+                "comment_karma":sql.session.execute(Select.user_karma_point_comment({"user_id":session["user"]})).mappings().fetchone()["sum"],
+                "post_karma":sql.session.execute(Select.user_karma_point_post({"user_id":session["user"]})).mappings().fetchone()["sum"]
+            }
+            if picture["profile_picture"] is None:
+                picture = {"profile_picture": "pp.jpg"}
+            return render_template('home.html',user=user, picture = profile_photos_dir+picture["profile_picture"],stats = user_scores)
     return render_template('home.html')
 
 @app.route('/add-profile-picture', methods=['GET', 'POST'])
@@ -78,47 +80,42 @@ def add_profile_picture():
             return """<script>window.close();</script>"""
         if "user" not in session:
             return redirect(url_for('login'))
-        sql = sqlconn()
-        user = sql.session.execute(Select.user_username({"id":session["user"]})).mappings().fetchone()
-        if "username" in user:
-            user = user["username"]
-        else:
-            sql.close()
-            return("Error."),400
-        rand= "pp-"+str(uuid.uuid4())+".jpg"
-        filepath = project_dir+"/static/"+profile_photos_dir+rand
-        form.photo.data.save(filepath)
-        try:
-            img = Image.open(filepath)
-            img.verify()
-            img.close()
-        except:
-            os.remove(filepath)
-            sql.close()
-            flash("This is not an image")
-            return """<script>window.close();</script>""",400
-        sql.session.execute(Update.user_profile_picture({"id":user,"profile_picture":rand}))
-        sql.commit()
-        sql.close()
-        flash('Picture added successfully!')
-        return """<script>window.close();window.opener.location.reload();</script>"""
+        with sqlconn() as sql:
+            user = sql.session.execute(Select.user_username({"id":session["user"]})).mappings().fetchone()
+            if "username" in user:
+                user = user["username"]
+            else:
+                return("Error."),400
+            rand= "pp-"+str(uuid.uuid4())+".jpg"
+            filepath = project_dir+"/static/"+profile_photos_dir+rand
+            form.photo.data.save(filepath)
+            try:
+                img = Image.open(filepath)
+                img.verify()
+                img.close()
+            except:
+                os.remove(filepath)
+                flash("This is not an image")
+                return """<script>window.close();</script>""",400
+            sql.session.execute(Update.user_profile_picture({"id":user,"profile_picture":rand}))
+            sql.commit()
+            flash('Picture added successfully!')
+            return """<script>window.close();window.opener.location.reload();</script>"""
     return render_template('add-profile-picture.html', form=form)
 
 @app.route('/remove-profile-picture', methods=['GET'])
 def remove_profile_picture():
     if "user" not in session:
         return redirect(url_for('login'))
-    sql = sqlconn()
-    user = sql.session.execute(Select.user_username({"id":session["user"]})).mappings().fetchone()
-    if "username" in user:
-        user = user["username"]
-    else:
-        sql.close()
-        return("Error."),400
-    sql.session.execute(Update.user_profile_picture({"id":user,"profile_picture":None}))
-    sql.commit()
-    sql.close()
-    flash('Picture removed successfully!')
-    return redirect(url_for('home'))
+    with sqlconn() as sql:
+        user = sql.session.execute(Select.user_username({"id":session["user"]})).mappings().fetchone()
+        if "username" in user:
+            user = user["username"]
+        else:
+            return("Error."),400
+        sql.session.execute(Update.user_profile_picture({"id":user,"profile_picture":None}))
+        sql.commit()
+        flash('Picture removed successfully!')
+        return redirect(url_for('home'))
 
 from app import comments_views,posts_views,forums_views

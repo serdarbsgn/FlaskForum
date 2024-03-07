@@ -6,6 +6,16 @@ from app.sql_dependant.sql_tables import *
 from sqlalchemy.sql.functions import coalesce,concat,count
 
 class Select():
+
+    def user_post_count(data):
+        return select(count(Post.user_id)).where(Post.user_id == data["user_id"])
+    def user_karma_point_post(data):
+        return select(func.sum(Post.likes)).where(Post.user_id == data["user_id"])
+    def user_comment_count(data):
+        return select(count(Comment.user_id)).where(Comment.user_id == data["user_id"])
+    def user_karma_point_comment(data):
+        return select(func.sum(Comment.likes)).where(Comment.user_id == data["user_id"])
+
     def commentlikes_exists(data):
         return select(CommentLikes.l_d).where(CommentLikes.user_id == data["user_id"],CommentLikes.comment_id == data["comment_id"])
     
