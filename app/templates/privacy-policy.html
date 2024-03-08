@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Privacy Policy</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+
+<body>
+  
+  {% with messages = get_flashed_messages() %}
+  {% if messages %}
+  <ul class=flashes>
+    {% for message in messages %}
+    <li>{{ message }}</li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+  {% endwith %}
+  {% include 'header.html' %}
+  <h3>We don't share your data with anyone, and only feasible data we hold is your email address and profile picture of your google account.</h3>
+  <h3>By using your Google account to register, you are letting us to hold on to your Google account profile picture and Google email address.</h3>
+  <h3></h3>The data we got from you can removed via the functions in the website, so you can delete them.</h3>
+  {% include 'footer.html' %}
+</body>
+
+</html>

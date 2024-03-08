@@ -90,6 +90,28 @@ def home():
             return render_template('home.html',user=user, picture = profile_photos_dir+picture["profile_picture"],stats = user_scores)
     return render_template('home.html')
 
+@app.route('/terms-of-service', methods=['GET'])
+def home():
+    if "user" in session:
+        user =  session["user"]
+        with sqlconn() as sql:
+            user = sql.session.execute(Select.user_username({"id":user})).mappings().fetchone()
+            if "username" in user:
+                user = user["username"]
+            return render_template('terms-of-service.html',user=user)
+    return render_template('terms-of-service.html')
+
+@app.route('/privacy-policy', methods=['GET'])
+def home():
+    if "user" in session:
+        user =  session["user"]
+        with sqlconn() as sql:
+            user = sql.session.execute(Select.user_username({"id":user})).mappings().fetchone()
+            if "username" in user:
+                user = user["username"]
+            return render_template('privacy-policy.html',user=user)
+    return render_template('privacy-policy.html')
+
 @app.route('/add-profile-picture', methods=['GET', 'POST'])
 def add_profile_picture():
     form = AddProfilePicture()
