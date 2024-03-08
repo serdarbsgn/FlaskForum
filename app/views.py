@@ -91,7 +91,7 @@ def home():
     return render_template('home.html')
 
 @app.route('/terms-of-service', methods=['GET'])
-def home():
+def terms_of_service():
     if "user" in session:
         user =  session["user"]
         with sqlconn() as sql:
@@ -102,7 +102,7 @@ def home():
     return render_template('terms-of-service.html')
 
 @app.route('/privacy-policy', methods=['GET'])
-def home():
+def privacy_policy():
     if "user" in session:
         user =  session["user"]
         with sqlconn() as sql:
