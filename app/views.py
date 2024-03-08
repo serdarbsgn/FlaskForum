@@ -1,6 +1,6 @@
 import uuid
 
-from app.flaskforms import  RegisterForm,LoginForm,AddProfilePicture
+from app.flaskforms import  RegisterForm,LoginForm,AddProfilePicture, UsernameForm
 from flask import  redirect, url_for,render_template,session,flash,request,escape
 from app.sql_dependant.sql_read import Select
 from app.sql_dependant.sql_tables import   User
@@ -22,6 +22,7 @@ def register():
         with sqlconn() as sql:
             check = sql.session.execute(Select.user_unique_username_email({"username":user.username,"email":user.email})).mappings().fetchall()
             if len(check)>0:
+                flash("Email and/or Username already exists")
                 return "Email and/or Username already exists",400
             sql.session.add(user)
             sql.session.commit()
@@ -41,6 +42,24 @@ def login():
             flash("You are a fraud")
             return render_template('login.html', form=form),401
     return render_template('login.html', form=form)
+
+@app.route('/change-username', methods=['GET','POST'])
+def change_username():
+    if "user" not in session:
+        return redirect(url_for('login'))
+    form = UsernameForm()
+    if form.validate_on_submit():
+        with sqlconn() as sql:
+            check = sql.session.execute(Select.user_unique_username({"username":escape(form.username._value())})).mappings().fetchall()
+            if len(check)>0:
+                flash("Username already exists")
+                return "Username already exists",400
+            sql.session.execute(Update.user_username({"id":session["user"],"username":escape(form.username._value())}))
+            sql.session.commit()
+            flash("Success")
+            return redirect(url_for('home')),200
+    return render_template('username_change.html',form=form)
+        
 
 @app.route('/logout',methods=['GET'])
 def logout():
@@ -118,4 +137,5 @@ def remove_profile_picture():
         flash('Picture removed successfully!')
         return redirect(url_for('home'))
 
-from app import comments_views,posts_views,forums_views
+
+from app import comments_views,posts_views,forums_views,views_google_oauth2

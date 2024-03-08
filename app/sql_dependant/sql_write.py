@@ -21,6 +21,9 @@ class Update():
         statement = update(User).where(User.username == data["id"]).values(profile_picture = data["profile_picture"])
         return statement
     
+    def user_username(data):
+        return update(User).where(User.id == data["id"]).values(username = data["username"])
+
     def comment_user_like_comment(data):
         return update(Comment).where(Comment.id == data["comment_id"]).values(likes = Comment.likes + 1)
     

@@ -4,6 +4,7 @@ from .sql_dependant.env_init import JWT_SECRET_KEY,PASSWORD_SALT
 from hashlib import pbkdf2_hmac
 from flask import request
 
+
 def decode_jwt_token(encoded_content):
     try:
         decoded_content = jwt.decode(encoded_content, JWT_SECRET_KEY, ["HS256"])
@@ -24,4 +25,3 @@ def generate_hash(plain_password, password_salt=PASSWORD_SALT):
         10000,
     )
     return password_hash.hex()
-

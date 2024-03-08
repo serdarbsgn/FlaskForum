@@ -36,3 +36,6 @@ class UpdatePostForm(FlaskForm):
     title = StringField('Title', validators=[DataRequired()])
     content = TextAreaField('Content', validators=[DataRequired()])
     submit = SubmitField('Post')
+
+class UsernameForm(FlaskForm):
+    username = StringField('Username', validators=[InputRequired(), Length(min=4, max=20)])

@@ -7,6 +7,8 @@ from sqlalchemy.sql.functions import coalesce,concat,count
 
 class Select():
 
+    def user_oauth2_email_exists(data):
+        return select(User.id,User.email).where(User.email == data["email"])
     def user_post_count(data):
         return select(count(Post.user_id)).where(Post.user_id == data["user_id"])
     def user_karma_point_post(data):
@@ -24,6 +26,10 @@ class Select():
     
     def user_unique_username_email(data):
         statement = select(User.id).where((User.username == data["username"]) | (User.email == data["email"]))
+        return statement
+
+    def user_unique_username(data):
+        statement = select(User.id).where(User.username == data["username"])
         return statement
 
     def user_exists_username_password(data):
