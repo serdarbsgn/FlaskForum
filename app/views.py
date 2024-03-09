@@ -5,7 +5,7 @@ from flask import  redirect, url_for,render_template,session,flash,request,escap
 from app.sql_dependant.sql_read import Select
 from app.sql_dependant.sql_tables import   User
 from app.sql_dependant.sql_connection import sqlconn
-from app.sql_dependant.sql_write import  Update
+from app.sql_dependant.sql_write import  Delete, Update
 from app.utils import generate_hash
 from PIL import Image
 from . import app
@@ -60,7 +60,33 @@ def change_username():
             return redirect(url_for('home')),200
     return render_template('username_change.html',form=form)
         
-
+@app.route('/remove-account', methods=['GET','POST'])
+def remove_account():
+    if "user" not in session:
+        return redirect(url_for('home'))
+    form = UsernameForm()
+    if form.validate_on_submit():
+        with sqlconn() as sql:
+            get_user = sql.session.execute(Select.user_username({"id":session["user"]})).mappings().fetchone()
+            if "username" not in get_user:
+                flash("Write your username correctly to delete your account.")
+                return "Error.",400
+            username = get_user["username"]
+            if str(escape(form.username._value())) == username:
+                get_user_pp_location = sql.session.execute(Select.user_profile_picture({"user":username})).mappings().fetchone()
+                if get_user_pp_location["profile_picture"]:
+                    try:
+                        os.remove(project_dir+"/static/"+profile_photos_dir+get_user_pp_location["profile_picture"])
+                    except FileNotFoundError:
+                        pass
+                sql.session.execute(Delete.user({"id":session["user"],"username":username}))
+                sql.commit()
+                session.pop('user', None)
+                flash("Removed profile picture and all the info about you successfully.")
+                return redirect(url_for('home')),200
+    return render_template('remove-account.html',form=form)
+                
+            
 @app.route('/logout',methods=['GET'])
 def logout():
     if "user" in session:

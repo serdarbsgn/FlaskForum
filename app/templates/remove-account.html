@@ -1,0 +1,15 @@
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delete Account</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+  <body>
+<h2>Write your username and click the button to remove your account, all the data about you will be deleted from our server.</h2>
+<form id = form method="POST" action="{{ url_for('remove_account') }}">
+    {{ form.csrf_token }}
+    {{ form.username.label }} {{ form.username }}
+    <input type="submit" value="Remove Account" onclick="return confirm('Are you sure to remove your account? :/')">
+</form>
+</body>

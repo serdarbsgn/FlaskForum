@@ -2,15 +2,13 @@
     <nav>
         <ul>
             <li><a href="/">Home</a></li></li>
-            <li><a href="/forums">Forum</a></li>
+            <li><a href="{{url_for('forums_page')}}">Forum</a></li>
             {% if user %}
-                <li><a href="#" onclick="window.open('/add-profile-picture', 'newwindow', 'height=300,width=300'); return false;">Add profile picture</a></li>
-                <li><a href="/remove-profile-picture">Remove profile picture</a></li>
-                <li><a href="/logout">Logout</a></li>
+                <li><a href="{{url_for('logout')}}">Logout</a></li>
                 <li>{{ user }}</li>
             {% else %}
-                <li><a href="/login">Login</a></li>
-                <li><a href="/register">Register</a></li>
+                <li><a href="{{url_for('login')}}">Login</a></li>
+                <li><a href="{{url_for('register')}}">Register</a></li>
             {% endif %}
         </ul>
     </nav>

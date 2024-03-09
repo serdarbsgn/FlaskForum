@@ -37,6 +37,8 @@ class Update():
         return update(Post).where(Post.id == data["post_id"]).values(likes = Post.likes - 1)
 
 class Delete():
+    def user(data):
+        return delete(User).where(User.id == data["id"],User.username == data["username"])
     def comment(data):
         return delete(Comment).where(Comment.id == data["comment_id"],Comment.user_id == data["user_id"])
     def post(data):

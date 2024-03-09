@@ -32,7 +32,9 @@
     <br>
     <input type="submit" value="Login">
   </form>
-  <li><a href="/google-register">Login with Google</a></li>
+  <li><a href="{{url_for('google_sign_in')}}">Login with Google</a></li>
+  <li><a href="{{url_for('register')}}">Register</a></li>
+  <li><a href="/">Home</a></li>
   {% include 'footer.html' %}
 </body>
 
