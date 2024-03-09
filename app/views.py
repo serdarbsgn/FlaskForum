@@ -186,4 +186,4 @@ def remove_profile_picture():
         return redirect(url_for('home'))
 
 
-from app import comments_views,posts_views,forums_views,views_google_oauth2
+from app import comments_views,posts_views,forums_views,views_google_oauth2,views_facebook_oauth2
