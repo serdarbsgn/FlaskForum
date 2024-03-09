@@ -14,7 +14,7 @@ from app.sql_dependant.sql_connection import sqlconn
 from app.sql_dependant.sql_read import Select
 from werkzeug.datastructures import FileStorage
 from helpers import project_dir,profile_photos_dir
-fcallbackurl = "facebook.com"
+fcallbackurl = "https://serdarbsgn.com/f-callback"
 
 
 @app.route("/facebook-register",methods = ["GET"])
