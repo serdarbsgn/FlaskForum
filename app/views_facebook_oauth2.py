@@ -51,8 +51,7 @@ def facebook_callback():
         with sqlconn() as sql:
             exists = sql.session.execute(Select.user_oauth2_email_exists(user_data)).mappings().fetchone()
             if not exists:
-                role = state["role"]
-                if facebook_register_func(user_data,role):
+                if facebook_register_func(user_data):
                     pass
                 else:
                     return "Something went wrong",400
