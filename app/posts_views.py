@@ -1,5 +1,5 @@
 from app.flaskforms import  CreatePostForm, UpdatePostForm
-from flask import redirect, url_for,render_template,session,flash,request,escape
+from flask import redirect, url_for,render_template,escape,flash,request,session
 from app.sql_dependant.sql_read import Select
 from app.sql_dependant.sql_tables import  Post, PostLikes
 from app.sql_dependant.sql_connection import sqlconn
