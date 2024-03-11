@@ -36,6 +36,12 @@ class Select():
         statement = select(User.id).where(User.username==data["username"],User.password==data["password"])
         return statement
     
+    def user_exists_id_password(data):
+        return select(User.username).where(User.id == data["user_id"],User.password == data["password"])
+
+    def user_exists_id_none_password(data):
+        return select(User.username).where(User.id == data["user_id"],User.password == None)
+    
     def user_username(data):
         statement = select(User.username).where(User.id == data["id"])
         return statement

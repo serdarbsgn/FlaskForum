@@ -1,6 +1,6 @@
 import uuid
 
-from app.flaskforms import  RegisterForm,LoginForm,AddProfilePicture, UsernameForm
+from app.flaskforms import  ChangePasswordForm, RegisterForm,LoginForm,AddProfilePicture, SetPasswordForm, UsernameForm
 from flask import  redirect, url_for,render_template,session,flash,request,escape
 from app.sql_dependant.sql_read import Select
 from app.sql_dependant.sql_tables import   User
@@ -17,8 +17,8 @@ def register():
     if form.validate_on_submit():
         user = User(
             username=escape(form.username._value()),
-            email=form.email._value(),
-            password=generate_hash(form.password._value()))
+            email=escape(form.email._value()),
+            password=generate_hash(escape(form.password._value())))
         with sqlconn() as sql:
             check = sql.session.execute(Select.user_unique_username_email({"username":user.username,"email":user.email})).mappings().fetchall()
             if len(check)>0:
@@ -53,13 +53,48 @@ def change_username():
             check = sql.session.execute(Select.user_unique_username({"username":escape(form.username._value())})).mappings().fetchall()
             if len(check)>0:
                 flash("Username already exists")
-                return "Username already exists",400
+                return redirect(url_for('home')),400
             sql.session.execute(Update.user_username({"id":session["user"],"username":escape(form.username._value())}))
             sql.session.commit()
             flash("Success")
             return redirect(url_for('home')),200
     return render_template('username_change.html',form=form)
+
+@app.route('/change-password', methods=['GET','POST'])
+def change_password():
+    if "user" not in session:
+        return redirect(url_for('login'))
+    form = ChangePasswordForm()
+    if form.validate_on_submit():
+        with sqlconn() as sql:
+            check = sql.session.execute(Select.user_exists_id_password({"user_id":session["user"],
+            "password":generate_hash(escape(form.current_password._value()))})).mappings().fetchall()
+            if len(check)==0:
+                flash("Current password is wrong")
+                return redirect(url_for('home')),400
+            sql.session.execute(Update.user_password({"user_id":session["user"],"password":generate_hash(escape(form.new_password._value()))}))
+            sql.session.commit()
+            flash("Success")
+            return redirect(url_for('home')),200
+    return render_template('password_change.html',form=form)
         
+@app.route('/set-password', methods=['GET','POST'])
+def set_password():
+    if "user" not in session:
+        return redirect(url_for('login'))
+    form = SetPasswordForm()
+    if form.validate_on_submit():
+        with sqlconn() as sql:
+            check = sql.session.execute(Select.user_exists_id_none_password({"user_id":session["user"]})).mappings().fetchall()
+            if len(check)==0:
+                flash("This is only for the users registered with OAUTH2 methods.")
+                return redirect(url_for('home')),400
+            sql.session.execute(Update.user_password({"user_id":session["user"],"password":generate_hash(escape(form.new_password._value()))}))
+            sql.session.commit()
+            flash("Success")
+            return redirect(url_for('home')),200
+    return render_template('password_set.html',form=form)        
+
 @app.route('/remove-account', methods=['GET','POST'])
 def remove_account():
     if "user" not in session:
@@ -70,7 +105,7 @@ def remove_account():
             get_user = sql.session.execute(Select.user_username({"id":session["user"]})).mappings().fetchone()
             if "username" not in get_user:
                 flash("Write your username correctly to delete your account.")
-                return "Error.",400
+                return redirect(url_for('home')),400
             username = get_user["username"]
             if str(escape(form.username._value())) == username:
                 get_user_pp_location = sql.session.execute(Select.user_profile_picture({"user":username})).mappings().fetchone()

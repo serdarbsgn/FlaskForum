@@ -35,6 +35,8 @@
   <h4><a href="#" onclick="window.open('{{url_for('add_profile_picture')}}', 'newwindow', 'height=300,width=300'); return false;">Add profile picture</a></h4>
   <h4><a href="{{url_for('remove_profile_picture')}}">Remove profile picture</a></h4>
   <h4><a href="{{url_for('change_username')}}">Change username</a></h4>
+  <h4><a href="{{url_for('change_password')}}">Change password</a></h4>
+  <h4><a href="{{url_for('set_password')}}">Set Password</a> <br>If you registered with OAUTH2 methods and want to log in from the site using username and password.</h4>
   <h4><a href="{{url_for('remove_account')}}">Remove account</a></h4>
   {% endif %}
   {% include 'footer.html' %}

@@ -39,3 +39,10 @@ class UpdatePostForm(FlaskForm):
 
 class UsernameForm(FlaskForm):
     username = StringField('Username', validators=[InputRequired(), Length(min=4, max=20)])
+
+class ChangePasswordForm(FlaskForm):
+    current_password = PasswordField('Curent Password', validators=[InputRequired(), Length(min=8,max=80)])
+    new_password = PasswordField('New Password', validators=[InputRequired(), Length(min=8,max=80)])
+
+class SetPasswordForm(FlaskForm):
+    new_password = PasswordField('New Password', validators=[InputRequired(), Length(min=8,max=80)])

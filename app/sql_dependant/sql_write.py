@@ -23,7 +23,10 @@ class Update():
     
     def user_username(data):
         return update(User).where(User.id == data["id"]).values(username = data["username"])
-
+    
+    def user_password(data):
+        return update(User).where(User.id == data["user_id"]).values(password = data["password"])
+    
     def comment_user_like_comment(data):
         return update(Comment).where(Comment.id == data["comment_id"]).values(likes = Comment.likes + 1)
     
