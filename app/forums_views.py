@@ -4,6 +4,7 @@ from flask import  redirect, url_for,render_template,session,flash,request,escap
 from app.sql_dependant.sql_read import Select
 from app.sql_dependant.sql_tables import  Forum
 from app.sql_dependant.sql_connection import sqlconn
+from app.views import get_user_info
 from . import app
 from app.helpers import listify,profile_photos_dir
 
@@ -23,13 +24,8 @@ def forum_page():
         postcount = sql.session.execute(Select.posts_count(id)).mappings().fetchone()
         postcount = (postcount["count"]-1)//10
         if "user" in session:
-            user = sql.session.execute(Select.user_username({"id":session["user"]})).mappings().fetchone()
-            if "username" in user:
-                user = user["username"]
-            picture = sql.session.execute(Select.user_profile_picture({"user":user})).mappings().fetchone()
-            if picture["profile_picture"] is None:
-                picture = {"profile_picture": "pp.jpg"}
-            return render_template('forum.html',user=user,contents = contents,posts = posts,postcount=postcount)
+            user_info = get_user_info(sql)
+            return render_template('forum.html',user=user_info["username"],picture = profile_photos_dir+user_info["picture"]["profile_picture"],contents = contents,posts = posts,postcount=postcount)
         return render_template('forum.html',contents = contents,posts = posts,postcount=postcount)
 
 
@@ -38,23 +34,16 @@ def forums_page():
     pagenumber = 0
     if request.args.get("page"):
         pagenumber = request.args.get("page",0,type=int)
-    sql = sqlconn()
-    forums = listify(sql.session.execute(Select.forums(pagenumber)).mappings().fetchall())
-    for forum in forums:
-        forum["link"] = "forum?id="+str(forum["id"])
-    forumcount = sql.session.execute(Select.forums_count()).mappings().fetchone()
-    forumcount = (forumcount["count"]-1)//5
-    if "user" in session:
-        user = sql.session.execute(Select.user_username({"id":session["user"]})).mappings().fetchone()
-        if "username" in user:
-            user = user["username"]
-        picture = sql.session.execute(Select.user_profile_picture({"user":user})).mappings().fetchone()
-        if picture["profile_picture"] is None:
-            picture = {"profile_picture": "pp.jpg"}
-        sql.close()
-        return render_template('forums.html',forums = forums,user=user,page_count=forumcount,picture = profile_photos_dir+picture["profile_picture"])
-    sql.close()
-    return render_template('forums.html',forums = forums,page_count=forumcount)
+    with sqlconn() as sql:
+        forums = listify(sql.session.execute(Select.forums(pagenumber)).mappings().fetchall())
+        for forum in forums:
+            forum["link"] = "forum?id="+str(forum["id"])
+        forumcount = sql.session.execute(Select.forums_count()).mappings().fetchone()
+        forumcount = (forumcount["count"]-1)//5
+        if "user" in session:
+            user_info = get_user_info(sql)
+            return render_template('forums.html',forums = forums,user=user_info["username"],picture = profile_photos_dir+user_info["picture"]["profile_picture"],page_count=forumcount)
+        return render_template('forums.html',forums = forums,page_count=forumcount)
 
 @app.route('/create/forum',methods=['GET','POST'])
 def create_forum():
@@ -62,23 +51,15 @@ def create_forum():
     if form.validate_on_submit():
         if "user" not in session:
             return redirect(url_for('login'))
-        sql = sqlconn()
-        user = sql.session.execute(Select.user_username({"id":session["user"]})).mappings().fetchone()
-        if "username" in user:
-            user = user["username"]
-        else:
-            sql.close()
-            return("Error."),400
-        forum = Forum(
-            name=escape(form.name._value()),
-            description=escape(form.description._value()))
-        check = sql.session.execute(Select.forum_exists(form.name._value())).mappings().fetchall()
-        if len(check)>0:
-            sql.close()
-            return "Forum with this name already exists",400
-        sql.session.add(forum)
-        sql.session.commit()
-        sql.close()
-        flash('Forum added successfully!')
-        return """<script>window.close();window.opener.location.reload();</script>"""
+        with sqlconn() as sql:
+            forum = Forum(
+                name=escape(form.name._value()),
+                description=escape(form.description._value()))
+            check = sql.session.execute(Select.forum_exists(form.name._value())).mappings().fetchall()
+            if len(check)>0:
+                return "Forum with this name already exists",400
+            sql.session.add(forum)
+            sql.session.commit()
+            flash('Forum added successfully!')
+            return """<script>window.close();window.opener.location.reload();</script>"""
     return render_template('create_forum.html', form=form)

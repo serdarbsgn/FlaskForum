@@ -16,3 +16,4 @@ def redirect(link):
 
 def open_window(link):
     return '<script>window.open("'+link+'", "newwindow", "height=300,width=500");</script>'
+

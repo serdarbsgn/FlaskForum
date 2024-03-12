@@ -4,8 +4,9 @@ from app.sql_dependant.sql_read import Select
 from app.sql_dependant.sql_tables import  Post, PostLikes
 from app.sql_dependant.sql_connection import sqlconn
 from app.sql_dependant.sql_write import Update,Delete
+from app.views import get_user_info
 from . import app
-from app.helpers import listify
+from app.helpers import listify,profile_photos_dir
 
 @app.route('/post',methods = ['GET'])
 def post_page():
@@ -24,13 +25,8 @@ def post_page():
         comment_count = (comment_count["count"]-1)//20
         created_by = sql.session.execute(Select.user_username({"id":contents["user_id"]})).mappings().fetchone()["username"]
         if "user" in session:
-            user = sql.session.execute(Select.user_username({"id":session["user"]})).mappings().fetchone()
-            if "username" in user:
-                user = user["username"]
-            picture = sql.session.execute(Select.user_profile_picture({"user":user})).mappings().fetchone()
-            if picture["profile_picture"] is None:
-                picture = {"profile_picture": "pp.jpg"}
-            return render_template('post.html',user=user,contents = contents,created_by = created_by,comments=comments,comment_count=comment_count)
+            user_info = get_user_info(sql)
+            return render_template('post.html',user=user_info["username"],picture = profile_photos_dir+user_info["picture"]["profile_picture"],contents = contents,created_by = created_by,comments=comments,comment_count=comment_count)
         return render_template('post.html',contents = contents,created_by = created_by,comments=comments,comment_count=comment_count)
 
 @app.route('/create/post',methods=['GET','POST'])

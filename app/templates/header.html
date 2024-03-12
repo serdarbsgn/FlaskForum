@@ -6,6 +6,7 @@
             {% if user %}
                 <li><a href="{{url_for('logout')}}">Logout</a></li>
                 <li>{{ user }}</li>
+                <li><img src="{{ url_for('static', filename=picture) }}" alt="{{ user }}" style="width: 40px; height: 60px;"></li>
             {% else %}
                 <li><a href="{{url_for('login')}}">Login</a></li>
                 <li><a href="{{url_for('register')}}">Register</a></li>
