@@ -16,8 +16,8 @@
     {% endif %}
     {% endwith %}
     {% include 'header.html' %}
-    <h1> Welcome to {{ contents.name }} forum</h1>
-    <p>{{ contents.description }}</p>
+    <h1> Welcome to {{ contents.name|safe }} forum</h1>
+    <p>{{ contents.description|safe }}</p>
     <p>Created at: {{ contents.created_at }}</p>
 
 <a href="#" onclick="window.open('{{url_for('create_post' , forumid=contents.id)}}', 'newwindow', 'height=300,width=300'); return false;">Create a Post</a>
@@ -26,7 +26,7 @@
 <ul>
   {% for post in posts %}
     <li>
-      <a href= {{post.link}} > {{ post.title }}</a>
+      <a href= {{post.link}} > {{ post.title|safe }}</a>
       <p>Created at: {{ post.created_at }}</p>
     </li>
   {% endfor %}

@@ -19,8 +19,8 @@
   {% endif %}
   {% endwith %}
   {% include 'header.html' %}
-  <h1>{{ contents.title }}</h1>
-  <p>{{ contents.content }}</p>
+  <h1>{{ contents.title|safe }}</h1>
+  <p>{{ contents.content|safe }}</p>
   <p>Created at: {{ contents.created_at }}</p>
   <p>Created by: {{ created_by }}</p>
   <p>Updated at: {{ contents.updated_at }}</p>
