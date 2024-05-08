@@ -13,7 +13,7 @@ class LoginForm(FlaskForm):
     password = PasswordField('Password', validators=[InputRequired(), Length(min=8, max=80)])
 
 class AddProfilePicture(FlaskForm):
-    photo = FileField('Photo', validators=[InputRequired(), FileRequired(), FileAllowed(['jpg'], 'JPEG images only!')])
+    photo = FileField('Photo', validators=[InputRequired(), FileRequired(), FileAllowed(['jpg','jpeg','png'], 'JPG,JPEG,PNG images only!')])
 
 class CreateForumForm(FlaskForm):
     name = StringField('Name', validators=[DataRequired()])
@@ -46,3 +46,22 @@ class ChangePasswordForm(FlaskForm):
 
 class SetPasswordForm(FlaskForm):
     new_password = PasswordField('New Password', validators=[InputRequired(), Length(min=8,max=80)])
+
+class AddToCartForm(FlaskForm):
+    product_id = HiddenField()
+    add_to_cart = SubmitField('Add to Cart')
+
+class RemoveFromCartForm(FlaskForm):
+    product_id = HiddenField()
+    remove_from_cart = SubmitField('Remove from Cart')
+
+class UpdateCartForm(FlaskForm):
+    product_id = HiddenField()
+    quantity = IntegerField('Quantity', validators=[DataRequired(), NumberRange(min=1, max=10)])
+    remove_from_cart = SubmitField('Update')
+
+class AddProductForm(FlaskForm):
+    name = StringField('Name', validators=[DataRequired(), Length(max=255)])
+    description = TextAreaField('Description', validators=[DataRequired()])
+    price = FloatField('Price', validators=[DataRequired()])
+    photo = FileField('Photo', validators=[InputRequired(), FileRequired(), FileAllowed(['jpg','jpeg','png'], 'JPG,JPEG,PNG images only!')])

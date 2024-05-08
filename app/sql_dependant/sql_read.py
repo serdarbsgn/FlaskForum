@@ -88,3 +88,20 @@ class Select():
         return select(Comment.id,Comment.parent_id,User.username,Comment.content,Comment.likes,Comment.created_at,Comment.updated_at,exists().where(CommentAlias.parent_id == Comment.id,Comment.post_id == data["post_id"]
            ).label('has_replies')).join(User,Comment.user_id == User.id).where(
            Comment.post_id == data["post_id"],Comment.parent_id == data["parent_id"]).order_by(Comment.id)
+    
+    def products():
+        statement = select(Product.id,Product.name,Product.description,Product.price,Product.image)
+        return statement
+    
+    def cart(data):
+        return select(Cart.id).where(Cart.user_id == data["user"])
+    
+    def cart_item(data):
+        statement = select(CartItem.id,CartItem.cart_id,CartItem.product_id,CartItem.quantity,Product.name,Product.price).join(
+        Product, CartItem.product_id == Product.id).where(
+        CartItem.cart_id == select(Cart.id).where(Cart.user_id == data["user"]).scalar_subquery())
+        return statement
+    
+    def product_count():
+        return select(count(Product.id))    
+

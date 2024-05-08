@@ -167,14 +167,14 @@ def add_profile_picture():
     form = AddProfilePicture()
     if request.method == "POST":
         if not form.validate_on_submit():
-            flash("Only jpg files are allowed.")
+            flash("Only JPG,JPEG,PNG files are allowed.")
             return """<script>window.close();</script>"""
         if "user" not in session:
             return redirect(url_for('login'))
         with sqlconn() as sql:
             user_info = get_user_info(sql)
             rand= "pp-"+str(uuid.uuid4())+".jpg"
-            filepath = project_dir+"/static/"+profile_photos_dir+rand
+            filepath = project_dir+"/static"+profile_photos_dir+rand
             form.photo.data.save(filepath)
             try:
                 img = Image.open(filepath)
@@ -223,4 +223,4 @@ def get_user_info(sql):
 
     return {"username":user,"picture":picture}
 
-from app import comments_views,posts_views,forums_views,views_google_oauth2,views_facebook_oauth2
+from app import comments_views,posts_views,forums_views,views_google_oauth2,views_facebook_oauth2,views_market

@@ -1,0 +1,29 @@
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create a Product</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+  <body>
+  <body>
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    <ul class=flashes>
+    {% for message in messages %}
+      <li>{{ message }}</li>
+    {% endfor %}
+    </ul>
+    {% endif %}
+    {% endwith %}
+    <h1>Add Product</h1>
+    <form action="{{ url_for('add_product') }}" method="post" enctype="multipart/form-data">
+      {{ form.csrf_token }}<br>
+      {{ form.name.label }} {{ form.name }}<br>
+      {{ form.description.label }} {{ form.description }}<br>
+      {{ form.price.label }} {{ form.price }}<br>
+      {{ form.photo.label }} {{ form.photo }}<br>
+      <input type="submit" value="Add Product">
+    </form>
+  </body>
+</html>

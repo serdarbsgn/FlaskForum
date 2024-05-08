@@ -1,16 +1,26 @@
-<html>
-  <head>
-    <title>Marketplace</title>
-      <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-  </head>
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Marketplace</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+
   <body>
-  <h1>Marketplace</h1>
+  {% with messages = get_flashed_messages() %}
+  {% if messages %}
+  <ul class=flashes>
+    {% for message in messages %}
+    <li>{{ message }}</li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+  {% endwith %}
+  {% include 'header.html' %}
   {% if user %}
-      <li>Welcome {{ user }}</li>
-      <li><a href="/add-product">Add product</a></li>
-    {% else %}
-      <li><a href="/login">Login</a></li>
-    {% endif %}
+  {% endif %}
   <div class="products-grid">
       {% for product in products %}
       <div class="product-item">
@@ -29,5 +39,9 @@
       {% endfor %}
 
   </div>
+  <br><br>
+  <a href="#"
+    onclick="window.open('{{url_for('add_product')}}', 'newwindow', 'height=600,width=300'); return false;">Add product</a>
+  {% include 'footer.html' %}
   </body>
 </html>
