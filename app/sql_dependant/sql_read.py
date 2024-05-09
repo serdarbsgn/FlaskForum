@@ -102,6 +102,12 @@ class Select():
         CartItem.cart_id == select(Cart.id).where(Cart.user_id == data["user"]).scalar_subquery())
         return statement
     
+    def order_item(data):
+        statement = select(OrderItem.id,OrderItem.order_id,OrderItem.product_id,OrderItem.quantity,Product.name,Product.price).join(
+        Product, OrderItem.product_id == Product.id).where(
+        OrderItem.order_id.in_(select(Order.id).where(Order.user_id == data["user"]).scalar_subquery())).order_by(OrderItem.order_id)
+        return statement
+
     def product_count():
         return select(count(Product.id))    
 

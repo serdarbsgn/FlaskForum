@@ -10,6 +10,21 @@ from PIL import Image
 from app.views import get_user_info
 from app.helpers import *
 
+@app.route('/orders', methods=['GET'])
+def orders():
+    if "user" in session:
+        with sqlconn() as sql:
+            user =  get_user_info(sql)
+            order_items = sql.session.execute(Select.order_item({"user":session["user"]})).mappings().fetchall()
+            order_dict = {}
+            for order in order_items:
+                if order["order_id"] not in order_dict:
+                    order_dict[order["order_id"]] = [order]
+                else: order_dict[order["order_id"]].append(order)
+            print(order_dict)
+            return render_template('orders.html',user=user["username"],picture = profile_photos_dir+user["picture"]["profile_picture"],orders=order_dict)
+    return redirect(url_for('home')),401
+
 @app.route('/cart', methods=['GET'])
 def cart():
     if "user" in session:

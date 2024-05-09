@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Orders</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+
+<body>
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+<ul class=flashes>
+  {% for message in messages %}
+  <li>{{ message }}</li>
+  {% endfor %}
+</ul>
+{% endif %}
+{% endwith %}
+{% include 'header.html' %}
+{% if user %}
+    <head>
+    <title>{{ user }}'s Orders</title>
+    </head>
+    {% endif %}
+
+{% if user %}
+      <h1>{{ user }}'s Orders</h1>
+    {% endif %}
+
+<table>
+  <thead>
+    <tr>
+      <th>Product</th>
+      <th>Quantity</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for order in orders %}
+          {% for item in orders[order] %}
+            <tr>
+                <td>{{ item.name }}</td>
+                <td>{{ item.quantity }}</td>
+            </tr>
+          {% endfor %}
+          <tr><td><br></td><td><br></td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% include 'footer.html' %}
+</body>
+</html>
