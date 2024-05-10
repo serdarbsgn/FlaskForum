@@ -88,3 +88,8 @@ class OrderItem(Base):
     order_id = Column(Integer, ForeignKey('orders.id'), nullable=False)
     product_id = Column(Integer, ForeignKey('products.id'), nullable=False)
     quantity = Column(Integer, nullable=False)
+
+class ProductForum(Base):
+    __tablename__ = 'product_forum'
+    product_id = Column(Integer, ForeignKey('products.id'), nullable=False,primary_key=True)
+    forum_id = Column(Integer, ForeignKey('forums.id'), nullable=False)

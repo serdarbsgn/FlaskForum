@@ -90,7 +90,7 @@ class Select():
            Comment.post_id == data["post_id"],Comment.parent_id == data["parent_id"]).order_by(Comment.id)
     
     def products():
-        statement = select(Product.id,Product.name,Product.description,Product.price,Product.image)
+        statement = select(Product.id,Product.name,Product.description,Product.price,Product.image,ProductForum.forum_id).join(ProductForum,Product.id == ProductForum.product_id)
         return statement
     
     def cart(data):
@@ -111,3 +111,6 @@ class Select():
     def product_count():
         return select(count(Product.id))    
 
+    def product_id_from_photo(data):
+        return select(Product.id).where(Product.image == data["image"])
+        

@@ -1,8 +1,8 @@
 import uuid
 from app.flaskforms import AddProductForm,AddToCartForm,RemoveFromCartForm,UpdateCartForm
-from flask import redirect, url_for,render_template,request,session,flash,jsonify
+from flask import redirect, url_for,render_template,request,session,flash,jsonify,escape
 from app.sql_dependant.sql_read import Select
-from app.sql_dependant.sql_tables import Cart, Order, Product,OrderItem
+from app.sql_dependant.sql_tables import Cart, Forum, Order, Product,OrderItem, ProductForum
 from app.sql_dependant.sql_connection import sqlconn
 from app.sql_dependant.sql_write import Insert,Delete, Update
 from . import app
@@ -21,7 +21,6 @@ def orders():
                 if order["order_id"] not in order_dict:
                     order_dict[order["order_id"]] = [order]
                 else: order_dict[order["order_id"]].append(order)
-            print(order_dict)
             return render_template('orders.html',user=user["username"],picture = profile_photos_dir+user["picture"]["profile_picture"],orders=order_dict)
     return redirect(url_for('home')),401
 
@@ -121,13 +120,36 @@ def add_product():
                 flash("This is not an image")
                 return """<script>window.close();</script>""",400
             product = Product(
-                name = form.name._value(),
-                description = form.description._value(),
+                name = escape(form.name._value()),
+                description = escape(form.description._value()),
                 price = form.price._value(),
-                image = str(rand)
+                image = rand
             )
             sql.session.add(product)
             sql.commit()
+            product_id = sql.session.execute(Select.product_id_from_photo({"image":rand})).fetchone()[0]
+            check = sql.session.execute(Select.forum_exists(escape("Product: " +form.name._value()))).mappings().fetchall()
+            if len(check)>0:
+                product_forum_mapping = ProductForum(
+                    product_id = product_id,
+                    forum_id = check[0]["id"]
+                )
+                sql.session.add(product_forum_mapping)
+                sql.commit()
+                flash('Product already has a forum')
+            else:
+                product_forum = Forum(
+                name=escape("Product: " + form.name._value()),
+                description=escape(form.description._value()))
+                sql.session.add(product_forum)
+                sql.commit()
+                forumid = sql.session.execute(Select.forum_exists(escape("Product: " + form.name._value()))).fetchone()[0]
+                product_forum_mapping = ProductForum(
+                    product_id = product_id,
+                    forum_id = forumid
+                )
+                sql.session.add(product_forum_mapping)
+                sql.commit()
             flash('Product added successfully!')
             return """<script>window.close();window.opener.location.reload();</script>"""
     return render_template('add-product.html', form=form)
@@ -161,13 +183,10 @@ def checkout():
         sql.session.commit()
 
         total= 0
-        itemlist = []
         for item in cart_items:
-            for i in range(item["quantity"]):
-                itemlist.append({"id":str(item["product_id"]),"name":str(item["name"]),"price":str(item["price"]),"itemType":"VIRTUAL",'category1': 'Game'})
             total += item["quantity"]*item["price"]
-
-    return jsonify(itemlist,total)
+    flash(f'We got your order, total price is:{total}')
+    return redirect(url_for('orders'))
 
 
 def listify(map):
