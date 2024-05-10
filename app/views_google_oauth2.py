@@ -14,7 +14,7 @@ from . import utils
 from uuid import uuid4
 from werkzeug.datastructures import FileStorage
 from app.helpers import project_dir,profile_photos_dir
-callbackurl = "https://serdarbsgn.com.tr/callback"
+callbackurl = "https://serdarbisgin.com.tr/callback"
 
 @app.route("/google-register",methods = ["GET"])
 def google_sign_in():
