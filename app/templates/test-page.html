@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <title>Simple Canvas Game</title>
+    <style>
+        canvas {
+            border: 1px solid black;
+        }
+    </style>
+</head>
+<body>
+    {% include 'header.html' %}
+    <canvas id="gameCanvas" width="800" height="800"></canvas>
+
+    <script>
+        // Get a reference to the canvas element
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const Direction = {
+            UP: 'UP',
+            DOWN: 'DOWN',
+            LEFT: 'LEFT',
+            RIGHT: 'RIGHT'
+        };
+        // Define player position
+        let playerX = canvas.width/2;
+        let playerY = canvas.height/2;
+        let playerArr = []
+        let direction = NaN;
+        let speed = 1;
+        let baitX = 0;
+        let baitY = 0;
+        setBaitCoordinates()
+        let playerSize = 1;
+        let startGame = false;
+
+
+        function normalizeCoordinates(normX, normY) {
+        if (normX % 10 > 6) {
+            normX = parseInt(((normX / 10) + 1)) * 10;
+        } else normX = parseInt(normX / 10) * 10;
+        if (normY % 10 > 6) {
+            normY = parseInt(((normY / 10) + 1))* 10;
+        } else normY = parseInt(normY / 10) * 10;
+        return [normX, normY];
+        }
+
+        function setBaitCoordinates() {
+        baitX = parseInt(((Math.random() * (canvas.width - 50)) + 20) / 10) * 10;
+        baitY = parseInt(((Math.random() * (canvas.height - 50)) + 20) / 10) * 10;
+        }
+
+        // Main game loop
+        function gameLoop() {
+
+            if(startGame){
+
+                if (baitX === playerX && baitY === playerY){
+                    playerSize += 1;
+                    setBaitCoordinates();
+                }
+                if (direction === Direction.UP && playerY > 20){
+                    playerY -= speed;
+                }
+                if (direction === Direction.DOWN && playerY < canvas.height - 20){
+                    playerY += speed;
+                }
+                if (direction === Direction.LEFT && playerX > 20){
+                    playerX -= speed;
+                }
+                if (direction === Direction.RIGHT && playerX < canvas.width - 20){
+                    playerX += speed;
+                }
+                const collisionIndex = playerArr.findIndex(c => c[0] === playerX && c[1] === playerY);
+                if (collisionIndex !== -1) {
+                    console.log(collisionIndex)
+                    playerSize = playerSize - parseInt(collisionIndex/100)
+                    playerArr.splice(0,collisionIndex);
+                }
+                if (playerArr.length > playerSize * 100){
+                    playerArr.shift();
+                }
+                //playerArr.push(normalizeCoordinates(playerX,playerY));//to get a clear snake line,needs revision
+                playerArr.push([playerX,playerY]);//to get more fluid snake line
+
+                render();
+                
+            }
+            else{
+                renderMenu();
+            }
+            requestAnimationFrame(gameLoop);
+        }
+
+        // Function to render the game state
+        function render() {
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = 'gray';
+            ctx.fillRect(0,0,canvas.width,canvas.height);
+            ctx.fillStyle = 'green';
+            ctx.fillRect(25,25,canvas.width-50,canvas.height-50);
+            ctx.fillStyle = 'blue';
+            ctx.fillRect(baitX, baitY, 10, 10);
+            playerArr.forEach(function(e) {
+                ctx.beginPath();
+                ctx.arc(e[0]+5, e[1]+5, 5, 0, Math.PI * 2); // Radius of 5
+                ctx.fillStyle = 'red'; // Fill color
+                ctx.fill();
+                ctx.closePath();
+            });
+            ctx.font = '20px Arial';
+            ctx.fillStyle = 'black';
+            ctx.fillText(playerSize,canvas.width/2,20)
+        }
+
+        function renderMenu(){
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = 'gray';
+            ctx.fillRect(0,0,canvas.width,canvas.height);
+            ctx.font = '20px Arial';
+            ctx.fillStyle = 'black';
+            ctx.fillText("Press Space",canvas.width/2-50,canvas.height/2-50)
+        }
+
+        // Start the game loop
+        gameLoop();
+
+        // Listen for key presses
+        document.addEventListener('keydown', function(event) {
+            // Move the player based on the arrow keys
+            
+            if ((event.key == 'ArrowUp' || event.key.toUpperCase() == 'W') && direction!= Direction.DOWN && direction!=Direction.UP)  {
+                direction = Direction.UP
+                const normArr = normalizeCoordinates(playerX,playerY)
+                playerX = normArr[0]
+                playerY = normArr[1]
+            }
+            if ((event.key == 'ArrowDown'|| event.key.toUpperCase()  == 'S')&& direction!= Direction.DOWN && direction!=Direction.UP){
+                direction = Direction.DOWN
+                const normArr = normalizeCoordinates(playerX,playerY)
+                playerX = normArr[0]
+                playerY = normArr[1]
+            }
+            if ((event.key == 'ArrowLeft'|| event.key.toUpperCase()  == 'A')&& direction!= Direction.LEFT && direction!=Direction.RIGHT){
+                direction = Direction.LEFT
+                const normArr = normalizeCoordinates(playerX,playerY)
+                playerX = normArr[0]
+                playerY = normArr[1]
+            }
+            if ((event.key == 'ArrowRight'|| event.key.toUpperCase()  == 'D')&& direction!= Direction.LEFT && direction!=Direction.RIGHT){
+                direction = Direction.RIGHT
+                const normArr = normalizeCoordinates(playerX,playerY)
+                playerX = normArr[0]
+                playerY = normArr[1]
+            }
+            if (event.key == ' '){
+                startGame = true
+                direction = Direction.RIGHT
+            }
+        });
+
+    </script>
+    {% include 'footer.html' %}
+</body>
+</html>
