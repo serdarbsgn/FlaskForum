@@ -49,7 +49,8 @@
         let pauseGame = false;
         let lastFrameTime = 0;
         const frameDelay = 1000 / 25;
-
+        
+        //no need for this since snake moves 10 pixels per draw
         function normalizeCoordinates(normX, normY) {
         if (normX % 10 > 6) {
             normX = parseInt(((normX / 10) + 1)) * 10;
@@ -158,9 +159,8 @@
                     ctx.fillStyle = 'black';
                 }
                 else{
-                    let r_section = (255+(parseInt(snakeParts/10)-playerSize)*25)%256;
-                    let b_section = Math.abs(((255 - r_section)%256))
-                    ctx.fillStyle = `rgb(${r_section},${Math.abs(b_section-128)},${b_section})`;
+                    let hue = ((playerSize - Math.floor(((snakeParts))/10)-1)*12)%360;
+                    ctx.fillStyle = `hsl(${hue}, 100%, 50%)`;
                 }
                 snakeParts+=1;
                 ctx.fill();
@@ -199,28 +199,28 @@
 
             if ((event.key == 'ArrowUp' || event.key.toUpperCase() == 'W') && direction!= Direction.DOWN && direction!=Direction.UP && acceptInput)  {
                 direction = Direction.UP
-                const normArr = normalizeCoordinates(playerX,playerY)
+                const normArr = [playerX,playerY]
                 playerX = normArr[0]
                 playerY = normArr[1]
                 acceptInput = false
             }
             if ((event.key == 'ArrowDown'|| event.key.toUpperCase()  == 'S')&& direction!= Direction.DOWN && direction!=Direction.UP && acceptInput){
                 direction = Direction.DOWN
-                const normArr = normalizeCoordinates(playerX,playerY)
+                const normArr = [playerX,playerY]
                 playerX = normArr[0]
                 playerY = normArr[1]
                 acceptInput = false
             }
             if ((event.key == 'ArrowLeft'|| event.key.toUpperCase()  == 'A')&& direction!= Direction.LEFT && direction!=Direction.RIGHT && acceptInput){
                 direction = Direction.LEFT
-                const normArr = normalizeCoordinates(playerX,playerY)
+                const normArr = [playerX,playerY]
                 playerX = normArr[0]
                 playerY = normArr[1]
                 acceptInput = false
             }
             if ((event.key == 'ArrowRight'|| event.key.toUpperCase()  == 'D')&& direction!= Direction.LEFT && direction!=Direction.RIGHT && acceptInput){
                 direction = Direction.RIGHT
-                const normArr = normalizeCoordinates(playerX,playerY)
+                const normArr = [playerX,playerY]
                 playerX = normArr[0]
                 playerY = normArr[1]
                 acceptInput = false
