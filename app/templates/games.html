@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Games Page</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+
+<body>
+  {% with messages = get_flashed_messages() %}
+  {% if messages %}
+  <ul class=flashes>
+    {% for message in messages %}
+    <li>{{ message }}</li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+  {% endwith %}
+  {% include 'header.html' %}
+  <h1>Games</h1>
+  <p>These are the games I wrote in Java, then ported to JavaScript to play on browser.</p>
+  <a href="{{url_for('snake_js')}}">Click Here to Play Snake</a>
+  <a href="{{url_for('minesweeper_js')}}">Click Here to Play MineSweeper</a>
+  {% include 'footer.html' %}
+</body>
+
+</html>

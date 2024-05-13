@@ -15,6 +15,14 @@ from app.helpers import *
 def snake_js():
     return render_template('snake-game.html')
 
+@app.route('/minesweeper',methods = ['GET'])
+def minesweeper_js():
+    return render_template('minesweeper-game.html')
+
+@app.route('/games',methods = ['GET'])
+def games():
+    return render_template('games.html')
+
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     form = RegisterForm()

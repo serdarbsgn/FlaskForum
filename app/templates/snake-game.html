@@ -49,7 +49,7 @@
         let pauseGame = false;
         let lastFrameTime = 0;
         const frameDelay = 1000 / 25;
-        
+
         //no need for this since snake moves 10 pixels per draw
         function normalizeCoordinates(normX, normY) {
         if (normX % 10 > 6) {
@@ -104,7 +104,7 @@
                         if (collisionIndex !== -1) {
                             playerScore = playerSize
                             playerSize = playerSize - Math.ceil(collisionIndex/snakeSize)
-                            if (playerSize == 0){
+                            if (playerSize <= 0){
                                 startGame = false
                                 gameOver = true
                             }
