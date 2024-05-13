@@ -6,8 +6,9 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
     <title>Simple Canvas Game</title>
     <style>
-        canvas {
-            border: 1px solid black;
+        #gameCanvas {
+            display: block;
+            margin: auto;
         }
     </style>
 </head>
@@ -25,18 +26,22 @@
             LEFT: 'LEFT',
             RIGHT: 'RIGHT'
         };
+        let colour = 255
         // Define player position
         let playerX = canvas.width/2;
         let playerY = canvas.height/2;
         let playerArr = []
         let direction = NaN;
-        let speed = 1;
+        let speed = 10;
+        let snakeSize = 10;
         let baitX = 0;
         let baitY = 0;
         setBaitCoordinates()
         let playerSize = 1;
         let startGame = false;
-
+        let pauseGame = false;
+        let lastFrameTime = 0;
+        const frameDelay = 1000 / 25;
 
         function normalizeCoordinates(normX, normY) {
         if (normX % 10 > 6) {
@@ -49,48 +54,70 @@
         }
 
         function setBaitCoordinates() {
-        baitX = parseInt(((Math.random() * (canvas.width - 50)) + 20) / 10) * 10;
-        baitY = parseInt(((Math.random() * (canvas.height - 50)) + 20) / 10) * 10;
+        baitX = parseInt(((Math.random() * (canvas.width - 60)) + 20) / 10) * 10;
+        baitY = parseInt(((Math.random() * (canvas.height - 60)) + 20) / 10) * 10;
         }
 
         // Main game loop
         function gameLoop() {
 
-            if(startGame){
+            const currentTime = performance.now();
+            const deltaTime = currentTime - lastFrameTime;
 
-                if (baitX === playerX && baitY === playerY){
-                    playerSize += 1;
-                    setBaitCoordinates();
-                }
-                if (direction === Direction.UP && playerY > 20){
-                    playerY -= speed;
-                }
-                if (direction === Direction.DOWN && playerY < canvas.height - 20){
-                    playerY += speed;
-                }
-                if (direction === Direction.LEFT && playerX > 20){
-                    playerX -= speed;
-                }
-                if (direction === Direction.RIGHT && playerX < canvas.width - 20){
-                    playerX += speed;
-                }
-                const collisionIndex = playerArr.findIndex(c => c[0] === playerX && c[1] === playerY);
-                if (collisionIndex !== -1) {
-                    console.log(collisionIndex)
-                    playerSize = playerSize - parseInt(collisionIndex/100)
-                    playerArr.splice(0,collisionIndex);
-                }
-                if (playerArr.length > playerSize * 100){
-                    playerArr.shift();
-                }
-                //playerArr.push(normalizeCoordinates(playerX,playerY));//to get a clear snake line,needs revision
-                playerArr.push([playerX,playerY]);//to get more fluid snake line
+            if (deltaTime > frameDelay) {
+                lastFrameTime = currentTime;
+                if(startGame){
 
-                render();
-                
-            }
-            else{
-                renderMenu();
+                    if (pauseGame){
+                        renderPause()
+                    }
+                    else{
+                        if (baitX === playerX && baitY === playerY){
+                            playerSize += 1;
+                            setBaitCoordinates();
+                        }
+                        if (direction === Direction.UP && playerY > 20){
+                            playerY -= speed;
+                        }
+                        if (direction === Direction.DOWN && playerY < canvas.height - 30){
+                            playerY += speed;
+                        }
+                        if (direction === Direction.LEFT && playerX > 20){
+                            playerX -= speed;
+                        }
+                        if (direction === Direction.RIGHT && playerX < canvas.width - 30){
+                            playerX += speed;
+                        }
+                        const collisionIndex = playerArr.findIndex(c => c[0] === playerX && c[1] === playerY);
+                        if (collisionIndex !== -1) {
+                            playerSize = playerSize - parseInt(collisionIndex/snakeSize)
+                            if (playerSize == 0){
+                                startGame = false
+                            }
+                            playerArr.splice(0,collisionIndex);
+                        }
+                        if (playerArr.length > playerSize * snakeSize){
+                            playerArr.shift();
+                        }
+                        //playerArr.push(normalizeCoordinates(playerX,playerY));//to get a clear snake line,needs revision
+                        playerArr.push([playerX,playerY]);//to get more fluid snake line
+
+                        render();
+                    }
+                    
+                }
+                else{
+                    renderMenu();
+                    playerX = canvas.width/2;
+                    playerY = canvas.height/2;
+                    playerArr = []
+                    direction = NaN;
+                    speed = 10;
+                    snakeSize = 10;
+                    setBaitCoordinates()
+                    playerSize = 1;
+                    startGame = false;
+                }
             }
             requestAnimationFrame(gameLoop);
         }
@@ -105,10 +132,20 @@
             ctx.fillRect(25,25,canvas.width-50,canvas.height-50);
             ctx.fillStyle = 'blue';
             ctx.fillRect(baitX, baitY, 10, 10);
+            let snakeParts = 0;
+            const lastIndex = playerArr.length - 1;
             playerArr.forEach(function(e) {
                 ctx.beginPath();
-                ctx.arc(e[0]+5, e[1]+5, 5, 0, Math.PI * 2); // Radius of 5
-                ctx.fillStyle = 'red'; // Fill color
+                ctx.arc(e[0]+5, e[1]+5, 5, 0, Math.PI * 2);
+                if(snakeParts==lastIndex){
+                    ctx.fillStyle = 'black';
+                }
+                else{
+                    let r_section = (255+(parseInt(snakeParts/10)-playerSize)*25)%256;
+                    let b_section = Math.abs(((255 - r_section)%256))
+                    ctx.fillStyle = `rgb(${r_section},${Math.abs(b_section-128)},${b_section})`;
+                }
+                snakeParts+=1;
                 ctx.fill();
                 ctx.closePath();
             });
@@ -123,16 +160,19 @@
             ctx.fillRect(0,0,canvas.width,canvas.height);
             ctx.font = '20px Arial';
             ctx.fillStyle = 'black';
-            ctx.fillText("Press Space",canvas.width/2-50,canvas.height/2-50)
+            ctx.fillText("Press Space To Play or Pause",canvas.width/2-50,canvas.height/2-50)
+            ctx.fillText("WASD or Arrows to Move",canvas.width/2-50,canvas.height/2)
+            ctx.fillText("B to boost, you can pass through yourself if you time it right",canvas.width/2-200,canvas.height/2+50)
+
+        }
+        function renderPause(){
+
         }
 
-        // Start the game loop
         gameLoop();
 
-        // Listen for key presses
         document.addEventListener('keydown', function(event) {
-            // Move the player based on the arrow keys
-            
+
             if ((event.key == 'ArrowUp' || event.key.toUpperCase() == 'W') && direction!= Direction.DOWN && direction!=Direction.UP)  {
                 direction = Direction.UP
                 const normArr = normalizeCoordinates(playerX,playerY)
@@ -157,12 +197,32 @@
                 playerX = normArr[0]
                 playerY = normArr[1]
             }
-            if (event.key == ' '){
+
+            if (event.key == ' ' && startGame == true){
+                if (pauseGame){
+                    pauseGame = false
+                }
+                else{
+                    pauseGame = true
+                }
+            }
+
+
+            if (event.key == ' ' && startGame == false){
                 startGame = true
                 direction = Direction.RIGHT
             }
-        });
+            
+            if (event.key.toLowerCase() == 'b'){
+                speed = 20;
+            }
 
+        });
+        document.addEventListener('keyup', function(event) {
+            if (event.key.toLowerCase() == 'b'){
+                speed = 10;
+            }
+        });
     </script>
     {% include 'footer.html' %}
 </body>
