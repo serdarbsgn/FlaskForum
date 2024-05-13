@@ -11,9 +11,9 @@ from PIL import Image
 from . import app
 from app.helpers import *
 
-@app.route('/test',methods = ['GET'])
-def test_js():
-    return render_template('test-page.html')
+@app.route('/snake',methods = ['GET'])
+def snake_js():
+    return render_template('snake-game.html')
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
