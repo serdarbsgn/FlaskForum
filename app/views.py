@@ -1,3 +1,4 @@
+import logging
 import uuid
 
 from app.flaskforms import  ChangePasswordForm, RegisterForm,LoginForm,AddProfilePicture, SetPasswordForm, UsernameForm
@@ -116,9 +117,6 @@ def remove_account():
     if form.validate_on_submit():
         with sqlconn() as sql:
             get_user = sql.session.execute(Select.user_username({"id":session["user"]})).mappings().fetchone()
-            if "username" not in get_user:
-                flash("Write your username correctly to delete your account.")
-                return redirect(url_for('home')),400
             username = get_user["username"]
             if str(escape(form.username._value())) == username:
                 get_user_pp_location = sql.session.execute(Select.user_profile_picture({"user":username})).mappings().fetchone()
@@ -132,6 +130,8 @@ def remove_account():
                 session.pop('user', None)
                 flash("Removed profile picture and all the info about you successfully.")
                 return redirect(url_for('home')),200
+            flash("Write your username correctly to delete your account.")
+            return redirect(url_for('home')),400
     return render_template('remove-account.html',form=form)
                 
             
@@ -212,6 +212,12 @@ def remove_profile_picture():
         session.pop("picture")
         sql.session.execute(Update.user_profile_picture({"id":user_info["username"],"profile_picture":None}))
         sql.commit()
+        try:
+            os.remove(project_dir+"/static"+profile_photos_dir+user_info["picture"]["profile_picture"])
+        except FileNotFoundError:
+            pass
+        except Exception as e:
+            logging.warn(e)
         flash('Picture removed successfully!')
         return redirect(url_for('home'))
 
@@ -235,4 +241,4 @@ def get_user_info(sql):
 
     return {"username":user,"picture":picture}
 
-from app import comments_views,posts_views,forums_views,views_google_oauth2,views_facebook_oauth2,views_market
+from app import comments_views,posts_views,forums_views,views_google_oauth2,views_facebook_oauth2,views_market,views_api

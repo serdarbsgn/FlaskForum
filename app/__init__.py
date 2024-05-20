@@ -1,5 +1,7 @@
 import flask
+from flask_cors import CORS
 app = flask.Flask(__name__)
+cors = CORS(app, supports_credentials=True,resources={r"*": {"origins": "*"}})
 #For sql required stuff.
 import sqlalchemy
 from sqlalchemy.pool import NullPool
