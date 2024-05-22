@@ -69,10 +69,12 @@
                 let pos = cubes[i]
                 pos[0] = pos[0]+pos[2]
                 if(pos[0] > canvas.width-pos[5]-20){
-                    pos[2] = -Math.abs(pos[2])
+                    pos[0] = canvas.width-pos[5]-20;
+                    pos[2] = -Math.abs(pos[2]);
                 }
                 if(pos[0] < 20){
-                    pos[2] = Math.abs(pos[2])
+                    pos[0] = 20;
+                    pos[2] = Math.abs(pos[2]);
                 }
                 if(pos[3]>0)
                 {
@@ -81,6 +83,7 @@
                         pos[3] = pos[3]+g
                     }
                     else{
+                        pos[1] = canvas.height - pos[6] - 20
                         pos[3] = -pos[3] * pos[4]
                         if(Math.abs(pos[3]) < pos[4]*3) {
                             pos[3] = 0;
