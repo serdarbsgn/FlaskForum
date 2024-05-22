@@ -2,7 +2,7 @@ import logging
 import uuid
 
 from app.flaskforms import  ChangePasswordForm, RegisterForm,LoginForm,AddProfilePicture, SetPasswordForm, UsernameForm
-from flask import  redirect, url_for,render_template,session,flash,request,escape
+from flask import  redirect, send_file, url_for,render_template,session,flash,request,escape
 from app.sql_dependant.sql_read import Select
 from app.sql_dependant.sql_tables import   User
 from app.sql_dependant.sql_connection import sqlconn
@@ -15,6 +15,15 @@ from app.helpers import *
 @app.route('/snake',methods = ['GET'])
 def snake_js():
     return render_template('snake-game.html')
+
+@app.route('/favicon.ico',methods =['GET'])
+def icon():
+    filepath = project_dir+"/static"+profile_photos_dir+"pp.jpg"
+    return send_file(filepath, download_name='favicon.ico', as_attachment=False)
+
+@app.route('/physics',methods =['GET'])
+def physics():
+    return render_template('physics.html')
 
 @app.route('/minesweeper',methods = ['GET'])
 def minesweeper_js():
