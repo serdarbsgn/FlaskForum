@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
-    <title>Simple Canvas Game 2</title>
+    <title>Simple Canvas Game 3</title>
     <style>
         #gameCanvas {
             display: block;
@@ -19,8 +19,8 @@
     <script>
         // Get a reference to the canvas element
         const canvas = document.getElementById('gameCanvas');
-        canvas.width = window.innerWidth/2
-        canvas.height = window.innerHeight/2
+        canvas.width = window.innerWidth*2/3
+        canvas.height = window.innerHeight*2/3
         const ctx = canvas.getContext('2d');
         let mouseCoordinates = [0,0]
         let heldRectLastCoords = [0,0]

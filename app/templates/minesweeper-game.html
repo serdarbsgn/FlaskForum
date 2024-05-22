@@ -41,6 +41,7 @@
         function gameLoop() {
             if(gameOver)
             {
+                uncoverAllBombs();
                 render();
                 renderGameOver();
             }
@@ -270,17 +271,25 @@
         }
 
         function flagSquare(x,y) {
-        if (mineField[x][y] < 50) {
-            if (mineCountCopy > 0){
-                mineField[x][y] += 99;
-                mineCountCopy--;
+            if (mineField[x][y] < 50) {
+                if (mineCountCopy > 0){
+                    mineField[x][y] += 99;
+                    mineCountCopy--;
+                }
+            } else {
+                mineField[x][y] -= 99;
+                mineCountCopy++;
             }
-        } else {
-            mineField[x][y] -= 99;
-            mineCountCopy++;
         }
-    }
-
+        function uncoverAllBombs(){
+            for (let i = 1; i < cols - 1; i++) {
+                for (let j = 1; j < rows - 1; j++) {
+                    if (mineField[i][j] == 9){
+                        mineField[i][j] = -1;
+                    }
+                }
+            }
+        }
         function mouseClicked(e) {
             normalisedCoordinates = [Math.ceil((mouseCoordinates[0]-20)/25),Math.ceil((mouseCoordinates[1]-20)/25)]
             if(gameOver){
