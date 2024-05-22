@@ -19,6 +19,8 @@
     <script>
         // Get a reference to the canvas element
         const canvas = document.getElementById('gameCanvas');
+        canvas.width = window.innerWidth/2
+        canvas.height = window.innerHeight/2
         const ctx = canvas.getContext('2d');
         let mouseCoordinates = [0,0]
         let heldRectLastCoords = [0,0]
@@ -211,28 +213,77 @@
                 }
             }
         }
+        function mouseMoved(e) {
+            mouseCoordinates[0] = e.clientX - canvas.offsetLeft;
+            mouseCoordinates[1] = e.clientY - canvas.offsetTop;
+            if (heldRectIndex != -1){
+
+            cubes[heldRectIndex][0] = mouseCoordinates[0] + heldRectOffset[0];
+            cubes[heldRectIndex][1] = mouseCoordinates[1] + heldRectOffset[1];
+            cubes[heldRectIndex][2] = 0;
+            cubes[heldRectIndex][3] = 0;
+
+            const currentTime = performance.now()
+            let deltaX = cubes[heldRectIndex][0] - heldRectLastCoords[0];
+            let deltaY = cubes[heldRectIndex][1] - heldRectLastCoords[1];
+            heldRectSpeed[0] = 2*deltaX / (currentTime-lastFrameTime)
+            heldRectSpeed[1] = 2*deltaY / (currentTime-lastFrameTime)
+            }
+        }
+
         canvas.addEventListener('mousedown', mouseClicked);
         canvas.addEventListener('mouseup', mouseReleased);
-
-        function mouseMoved(e) {
-        mouseCoordinates[0] = e.clientX - canvas.offsetLeft;
-        mouseCoordinates[1] = e.clientY - canvas.offsetTop;
-        if (heldRectIndex != -1){
-
-        cubes[heldRectIndex][0] = mouseCoordinates[0] + heldRectOffset[0];
-        cubes[heldRectIndex][1] = mouseCoordinates[1] + heldRectOffset[1];
-        cubes[heldRectIndex][2] = 0;
-        cubes[heldRectIndex][3] = 0;
-
-        const currentTime = performance.now()
-        let deltaX = cubes[heldRectIndex][0] - heldRectLastCoords[0];
-        let deltaY = cubes[heldRectIndex][1] - heldRectLastCoords[1];
-        heldRectSpeed[0] = 2*deltaX / (currentTime-lastFrameTime)
-        heldRectSpeed[1] = 2*deltaY / (currentTime-lastFrameTime)
-        }
-
-        }
         canvas.addEventListener('mousemove', mouseMoved);
+
+        function touchStart(e) {
+                e.preventDefault();
+                let touch = e.touches[0];
+                mouseCoordinates[0] = touch.clientX - canvas.offsetLeft;
+                mouseCoordinates[1] = touch.clientY - canvas.offsetTop;
+                for (let i = 0; i < cubes.length; i++) {
+                    if (mouseCoordinates[0] > cubes[i][0] && mouseCoordinates[0] < cubes[i][0] + cubes[i][5] &&
+                    mouseCoordinates[1] > cubes[i][1] && mouseCoordinates[1] < cubes[i][1] + cubes[i][6]) {
+                        heldRectOffset[0] = cubes[i][0] - mouseCoordinates[0];
+                        heldRectOffset[1] = cubes[i][1] - mouseCoordinates[1];
+                        heldRectIndex = i;
+                        break;
+                    }
+                }
+        }
+
+        function touchEnd(e) {
+            e.preventDefault();
+            if (heldRectIndex !== -1) {
+                heldRectOffset[0] = 0;
+                heldRectOffset[1] = 0;
+                cubes[heldRectIndex][2] = heldRectSpeed[0];
+                cubes[heldRectIndex][3] = heldRectSpeed[1];
+                heldRectIndex = -1;
+            }
+        }
+
+        function touchMove(e) {
+            e.preventDefault();
+            let touch = e.touches[0];
+            mouseCoordinates[0] = touch.clientX - canvas.offsetLeft;
+            mouseCoordinates[1] = touch.clientY - canvas.offsetTop;
+            if (heldRectIndex !== -1) {
+                cubes[heldRectIndex][0] = mouseCoordinates[0] + heldRectOffset[0];
+                cubes[heldRectIndex][1] = mouseCoordinates[1] + heldRectOffset[1];
+                cubes[heldRectIndex][2] = 0;
+                cubes[heldRectIndex][3] = 0;
+
+                const currentTime = performance.now()
+                let deltaX = cubes[heldRectIndex][0] - heldRectLastCoords[0];
+                let deltaY = cubes[heldRectIndex][1] - heldRectLastCoords[1];
+                heldRectSpeed[0] = 4 * deltaX / (currentTime - lastFrameTime)
+                heldRectSpeed[1] = 4 * deltaY / (currentTime - lastFrameTime)
+            }
+        }
+
+        canvas.addEventListener('touchstart', touchStart);
+        canvas.addEventListener('touchend', touchEnd);
+        canvas.addEventListener('touchmove', touchMove);
         gameLoop();
 
     </script>
