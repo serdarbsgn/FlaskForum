@@ -27,7 +27,7 @@
             RIGHT: 'RIGHT'
         };
         const playPauseText = "Press Space To Play or Pause, Or Start or Option button on Controller.";
-        const controlsText = "WASD or Arrow Keys to Move, Or DPAD on Controller";
+        const controlsText = "WASD or Arrow Keys to Move, Or DPAD or Left Analog on Controller";
         const boostText = "B or Left Shift to boost,or Right shoulder or A button on Controller";
         const boostText2 = "you can pass through yourself if you time it right"
         const gameOverText = "Game Over, Your Score: "
@@ -346,6 +346,34 @@
             }
             if(speedBoosted == false && keyboardBoosted == false){
                 speed = 10
+            }
+            for (let k = 0; k < gp.axes.length; k++) {
+                if (Math.abs(gp.axes[k]) > 0.4) { // Simple dead zone check
+                    if(k == 1 && direction!= Direction.DOWN && direction!=Direction.UP && acceptInput){//this corresponds to up left analog stick y axis on Xbox controller
+                        if(gp.axes[k] > 0){
+                            direction = Direction.DOWN;
+                        }
+                        else{
+                            direction = Direction.UP;
+                        }
+                        const normArr = [playerX,playerY]
+                        playerX = normArr[0]
+                        playerY = normArr[1]
+                        acceptInput = false
+                    }
+                    else if(k == 0 && direction!= Direction.LEFT && direction!=Direction.RIGHT && acceptInput){//this corresponds to left analog stick x axis on Xbox controller
+                        if(gp.axes[k] > 0){
+                            direction = Direction.RIGHT;
+                        }
+                        else{
+                            direction = Direction.LEFT;
+                        }
+                        const normArr = [playerX,playerY]
+                        playerX = normArr[0]
+                        playerY = normArr[1]
+                        acceptInput = false
+                    }                    
+                }
             }
     }
 
