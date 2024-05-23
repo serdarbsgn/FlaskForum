@@ -324,7 +324,10 @@
                 if (gp.buttons[j].pressed) {
                     if(j == 14){//this corresponds to left arrow on Xbox controller
                         if(gamepadArrowDelay <= 0){
-                            highlightRectPad = Math.max(0,highlightRectPad-1);
+                            highlightRectPad = Math.max(-1,highlightRectPad-1);
+                            if(highlightRectPad == -1){
+                                highlightRectPad = cubes.length-1;
+                            }
                             gamepadArrowDelay = 10;
                         }
                         else{
@@ -333,7 +336,10 @@
                     }
                     else if(j == 15){//this corresponds to right arrow on Xbox controller
                         if(gamepadArrowDelay <= 0){
-                            highlightRectPad = Math.min(cubes.length-1,highlightRectPad+1);
+                            highlightRectPad = Math.min(cubes.length,highlightRectPad+1);
+                            if(highlightRectPad == cubes.length){
+                                highlightRectPad = 0;
+                            }
                             gamepadArrowDelay = 10;
                         }
                         else{
