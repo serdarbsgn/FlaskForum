@@ -26,9 +26,10 @@
             LEFT: 'LEFT',
             RIGHT: 'RIGHT'
         };
-        const playPauseText = "Press Space To Play or Pause"
-        const controlsText = "WASD or Arrow Keys to Move"
-        const boostText = "B or Left Shift to boost, you can pass through yourself if you time it right"
+        const playPauseText = "Press Space To Play or Pause, Or Start or Option button on Controller.";
+        const controlsText = "WASD or Arrow Keys to Move, Or DPAD on Controller";
+        const boostText = "B or Left Shift to boost,or Right shoulder or A button on Controller";
+        const boostText2 = "you can pass through yourself if you time it right"
         const gameOverText = "Game Over, Your Score: "
         let colour = 255
         // Define player position
@@ -44,10 +45,14 @@
         setBaitCoordinates()
         let playerSize = 1;
         let playerScore = 0;
+        let playerHighScore =0;
         let startGame = false;
         let gameOver = false;
         let pauseGame = false;
         let lastFrameTime = 0;
+        let gamepadConnected = 0;
+        let pauseBlocked = 0;
+        let keyboardBoosted = false;
         const frameDelay = 1000 / 25;
 
         //no need for this since snake moves 10 pixels per draw
@@ -74,14 +79,18 @@
 
             if (deltaTime > frameDelay) {
                 lastFrameTime = currentTime;
+                if(gamepadConnected>0){
+                updateGamepadStatus();}
                 if(startGame){
-
                     if (pauseGame){
                         renderPause()
                     }
                     else{
                         if (baitX === playerX && baitY === playerY){
                             playerSize += 1;
+                            if (playerSize>playerHighScore){
+                                playerHighScore = playerSize;
+                            }
                             setBaitCoordinates();
                         }
                         if (direction === Direction.UP && playerY > 20){
@@ -134,6 +143,7 @@
                     snakeSize = 10;
                     setBaitCoordinates();
                     playerSize = 1;
+                    playerHighScore =0;
                     }
                 }
             }
@@ -180,6 +190,7 @@
             ctx.fillText(playPauseText,(canvas.width-ctx.measureText(playPauseText).width)/2,canvas.height/2-30)
             ctx.fillText(controlsText,(canvas.width-ctx.measureText(controlsText).width)/2,canvas.height/2)
             ctx.fillText(boostText,(canvas.width-ctx.measureText(boostText).width)/2,canvas.height/2+30)
+            ctx.fillText(boostText2,(canvas.width-ctx.measureText(boostText2).width)/2,canvas.height/2+60)
 
         }
         function renderPause(){
@@ -191,7 +202,7 @@
             ctx.fillRect(0,0,canvas.width,canvas.height);
             ctx.font = '20px Arial';
             ctx.fillStyle = 'black';
-            ctx.fillText(`${gameOverText} ${playerScore}`,(canvas.width-ctx.measureText(`${gameOverText} ${playerScore}`).width)/2,canvas.height/2)
+            ctx.fillText(`${gameOverText} ${playerHighScore}`,(canvas.width-ctx.measureText(`${gameOverText} ${playerHighScore}`).width)/2,canvas.height/2)
         }
         gameLoop();
 
@@ -247,14 +258,98 @@
 
             if (event.key.toLowerCase() == 'b' || event.code == 'ShiftLeft'){
                 speed = 20;
+                keyboardBoosted = true;
             }
 
         });
         document.addEventListener('keyup', function(event) {
             if (event.key.toLowerCase() == 'b' || event.code == 'ShiftLeft'){
                 speed = 10;
+                keyboardBoosted = false;
             }
         });
+
+        window.addEventListener("gamepadconnected", (event) => {
+            gamepadConnected+=1;
+        });
+
+        window.addEventListener("gamepaddisconnected", (event) => {
+            gamepadConnected -= 1;
+        });
+
+
+    function updateGamepadStatus(){
+        const currentGamepads = navigator.getGamepads();
+        let gp = currentGamepads[0] // only using first controller.
+        let speedBoosted = false;
+        for (let j = 0; j < gp.buttons.length; j++) {
+                if (gp.buttons[j].pressed) {
+                    if(j == 12 && direction!= Direction.DOWN && direction!=Direction.UP && acceptInput){//this corresponds to up arrow on Xbox controller
+                        direction = Direction.UP
+                        const normArr = [playerX,playerY]
+                        playerX = normArr[0]
+                        playerY = normArr[1]
+                        acceptInput = false
+                    }
+                    else if(j == 13 && direction!= Direction.DOWN && direction!=Direction.UP && acceptInput){//this corresponds to down arrow on Xbox controller
+                        direction = Direction.DOWN
+                        const normArr = [playerX,playerY]
+                        playerX = normArr[0]
+                        playerY = normArr[1]
+                        acceptInput = false
+                    }
+                    else if(j == 14 && direction!= Direction.LEFT && direction!=Direction.RIGHT && acceptInput){//this corresponds to left arrow on Xbox controller
+                        direction = Direction.LEFT
+                        const normArr = [playerX,playerY]
+                        playerX = normArr[0]
+                        playerY = normArr[1]
+                        acceptInput = false
+                    }
+                    else if(j == 15 && direction!= Direction.LEFT && direction!=Direction.RIGHT && acceptInput){//this corresponds to right arrow on Xbox controller
+                        direction = Direction.RIGHT
+                        const normArr = [playerX,playerY]
+                        playerX = normArr[0]
+                        playerY = normArr[1]
+                        acceptInput = false
+                    }
+                    else if(j == 5 || j == 0 ){//right shoulder or A button is boost
+                        speed = 20;
+                        speedBoosted=true;
+                    }
+                    else if(j == 8 || j == 9){//these are option and start buttons, to pause or play.
+                        if(pauseBlocked <= 0){
+                            if (startGame){
+                                if (pauseGame){
+                                    pauseGame = false
+                                }
+                                else{
+                                    pauseGame = true
+                                }
+                            }
+
+                            else if (startGame == false && gameOver == false){
+                                startGame = true
+                                direction = Direction.RIGHT
+                            }
+
+                            else if (startGame == false && gameOver){
+                                gameOver = false
+                            }
+                        pauseBlocked = 3;
+                        }
+                        else{
+                            pauseBlocked--;
+                        }
+                    }
+                    console.log(j)
+                }
+            }
+            if(speedBoosted == false && keyboardBoosted == false){
+                speed = 10
+            }
+    }
+
+
     </script>
     {% include 'footer.html' %}
 </body>
