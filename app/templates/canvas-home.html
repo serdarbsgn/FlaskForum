@@ -25,12 +25,12 @@
         const cw10 = canvas.width/10;
         const cw20 = cw10/2;
         const  rectangles = [
-        {"x":0,"y":-ch10,"w":cw10,"h":ch10,"vx":getRandomInt(-3,3),"vy":0,"ec":getRandomInt(25,60)/100,"static":false,"href":"/home","shrink":true,"magnitude":1},
-        {"x":0,"y":-2*ch10,"w":cw10,"h":ch10,"vx":getRandomInt(-3,3),"vy":0,"ec":getRandomInt(25,60)/100,"static":false,"href":"/forums","shrink":true,"magnitude":1},
-        {"x":0,"y":-3*ch10,"w":cw10,"h":ch10,"vx":getRandomInt(-3,3),"vy":0,"ec":getRandomInt(25,60)/100,"static":false,"href":"/market","shrink":true,"magnitude":1},
-        {"x":0,"y":-4*ch10,"w":cw10,"h":ch10,"vx":getRandomInt(-3,3),"vy":0,"ec":getRandomInt(25,60)/100,"static":false,"href":"/games","shrink":true,"magnitude":1},
-        {"x":0,"y":-5*ch10,"w":cw10,"h":ch10,"vx":getRandomInt(-3,3),"vy":0,"ec":getRandomInt(25,60)/100,"static":false,"href":"/login","shrink":true,"magnitude":1},
-        {"x":0,"y":-6*ch10,"w":cw10,"h":ch10,"vx":getRandomInt(-3,3),"vy":0,"ec":getRandomInt(25,60)/100,"static":false,"href":"/register","shrink":true,"magnitude":1}
+        {"x":0,"y":-ch10,"w":cw10,"h":ch10,"vx":getRandomInt(-3,3),"vy":0,"ec":getRandomInt(25,60)/100,"static":false,"href":"/home","shrink":true,"magnitude":1,"dataFetched":false,"apiData":null},
+        {"x":0,"y":-2*ch10,"w":cw10,"h":ch10,"vx":getRandomInt(-3,3),"vy":0,"ec":getRandomInt(25,60)/100,"static":false,"href":"/forums","shrink":true,"magnitude":1,"dataFetched":false,"apiData":null},
+        {"x":0,"y":-3*ch10,"w":cw10,"h":ch10,"vx":getRandomInt(-3,3),"vy":0,"ec":getRandomInt(25,60)/100,"static":false,"href":"/market","shrink":true,"magnitude":1,"dataFetched":false,"apiData":null},
+        {"x":0,"y":-4*ch10,"w":cw10,"h":ch10,"vx":getRandomInt(-3,3),"vy":0,"ec":getRandomInt(25,60)/100,"static":false,"href":"/games","shrink":true,"magnitude":1,"dataFetched":false,"apiData":null},
+        {"x":0,"y":-5*ch10,"w":cw10,"h":ch10,"vx":getRandomInt(-3,3),"vy":0,"ec":getRandomInt(25,60)/100,"static":false,"href":"/login","shrink":true,"magnitude":1,"dataFetched":false,"apiData":null},
+        {"x":0,"y":-6*ch10,"w":cw10,"h":ch10,"vx":getRandomInt(-3,3),"vy":0,"ec":getRandomInt(25,60)/100,"static":false,"href":"/register","shrink":true,"magnitude":1,"dataFetched":false,"apiData":null}
         ]
         let lastFrameTime = 0;
         const frameDelay = 1000 / 165;
@@ -90,9 +90,10 @@
                     ctx.fillStyle = `hsl(${Math.floor(180)}, 0%, 50%)`;
                     ctx.fillRect(rectangles[highlightRectPad].x-5, rectangles[highlightRectPad].y-5, rectangles[highlightRectPad].w+10, rectangles[highlightRectPad].h+10);
                 }
+                else{gamepadHeldRectIndex = -1;}
                 calculate_physics(rectangles);
                 for(let i = rectangles.length-1;i>-1;i--){
-                    rect = rectangles[i];
+                    let rect = rectangles[i];
                     ctx.fillStyle = `hsl(${i*30}, 100%, 50%)`;
                     ctx.fillRect(rect.x, rect.y, rect.w, rect.h);
                     ctx.font = cw20+'px Arial';
@@ -101,7 +102,12 @@
                 }
             }
         }
-
+        function renderLoginForm(rect) {
+            // Render input field labels
+            ctx.fillStyle = 'black';
+            ctx.fillText('Username:', rect.x, rect.y+(cw20*2));
+            ctx.fillText('Password:', rect.x, rect.y+(cw20*3));
+}
         homeLoop();
 
         function calculate_physics(rectangles) {
@@ -238,6 +244,10 @@
             ctx.font = cw20+'px Arial';
             rectangles[index].w = ctx.measureText(rectangles[index].href).width*magnitude;
             rectangles[index].h = ch10*magnitude;
+            if(magnitude > 3){
+                const windowFeatures = `width=${rectangles[index].w},height=${rectangles[index].h},left=${rectangles[index].x},top=${rectangles[index].y}`;
+                window.open(rectangles[index].href, '_blank', windowFeatures);
+            }
         }
         function resetPage(index){
             ctx.font = cw20+'px Arial';
@@ -265,6 +275,8 @@
                             rectangles[i].shrink = true;
                             rectangles[i].static = false;
                         }
+                        
+
                         break;
                     }
                 }

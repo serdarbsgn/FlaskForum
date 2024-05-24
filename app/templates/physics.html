@@ -60,6 +60,7 @@
                     ctx.fillStyle = `hsl(${Math.floor(180)}, 0%, 50%)`;
                     ctx.fillRect(cubes[highlightRectPad][0]-5, cubes[highlightRectPad][1]-5, cubes[highlightRectPad][5]+10, cubes[highlightRectPad][6]+10);
                 }
+                else{gamepadHeldRectIndex = -1;}
                 for(let i=0; i< cubes.length;i++){
                     ctx.fillStyle = `hsl(${Math.floor(i * 30)}, 100%, 50%)`;
                     ctx.fillRect(cubes[i][0], cubes[i][1], cubes[i][5], cubes[i][6]);
