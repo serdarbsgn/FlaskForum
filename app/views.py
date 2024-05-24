@@ -12,6 +12,10 @@ from PIL import Image
 from . import app
 from app.helpers import *
 
+@app.route('/canvas-home',methods = ['GET'])
+def canvas_home():
+    return render_template('canvas-home.html')
+
 @app.route('/snake',methods = ['GET'])
 def snake_js():
     return render_template('snake-game.html')

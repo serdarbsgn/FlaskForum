@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <title>Canvas home page.</title>
+    <style>
+        #homeCanvas {
+            display: block;/*Never change this if you want to work with mouse listeners because in styles.css, body has flex attribute that carries over to canvas element.*/
+            margin: auto;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="homeCanvas" oncontextmenu="return false;"></canvas>
+<script>
+        // Get a reference to the canvas element
+        const canvas = document.getElementById('homeCanvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        const ch10 = canvas.height/10;
+        const cw10 = canvas.width/10;
+        const cw20 = cw10/2;
+        const  rectangles = [
+        {"x":0,"y":-ch10,"w":cw10,"h":ch10,"vx":getRandomInt(-3,3),"vy":0,"ec":getRandomInt(25,75)/100,"static":false,"href":"/home","shrink":true},
+        {"x":0,"y":-2*ch10,"w":cw10,"h":ch10,"vx":getRandomInt(-3,3),"vy":0,"ec":getRandomInt(25,75)/100,"static":false,"href":"/forums","shrink":true},
+        {"x":0,"y":-3*ch10,"w":cw10,"h":ch10,"vx":getRandomInt(-3,3),"vy":0,"ec":getRandomInt(25,75)/100,"static":false,"href":"/market","shrink":true},
+        {"x":0,"y":-4*ch10,"w":cw10,"h":ch10,"vx":getRandomInt(-3,3),"vy":0,"ec":getRandomInt(25,75)/100,"static":false,"href":"/games","shrink":true},
+        {"x":0,"y":-5*ch10,"w":cw10,"h":ch10,"vx":getRandomInt(-3,3),"vy":0,"ec":getRandomInt(25,75)/100,"static":false,"href":"/login","shrink":true},
+        {"x":0,"y":-6*ch10,"w":cw10,"h":ch10,"vx":getRandomInt(-3,3),"vy":0,"ec":getRandomInt(25,75)/100,"static":false,"href":"/register","shrink":true}
+        ]
+        let lastFrameTime = 0;
+        const frameDelay = 1000 / 165;
+        const mouseCoordinates = [0,0];
+        const heldRectLastCoords = [0,0];
+        const heldRectSpeed = [0,0];
+        const heldRectOffset=[0,0];
+        let heldRectIndex = -1;
+        let gamepadHeldRectIndex = -1;
+        const g = 0.5;
+        let clickedRectIndex = -1;
+
+
+        function getSpaces(){
+            let width = canvas.width;
+            rectangles.forEach((rect,index) => {
+            ctx.font = cw20+'px Arial';
+            width -= ctx.measureText(rect.href).width;
+            })
+            width = width / (rectangles.length+1);
+            return width;
+        }
+
+        function initializeRectangles(){
+            let spaces = getSpaces();
+            let cumulativeX = spaces;
+            rectangles.forEach((rect,index) => {
+            ctx.font = cw20+'px Arial';
+            rect.x = cumulativeX;
+            rect.w = ctx.measureText(rect.href).width;
+            cumulativeX +=rect.w+spaces;
+        })
+
+        }
+        initializeRectangles();
+
+        function homeLoop(){
+            render();
+            requestAnimationFrame(homeLoop);
+        }
+
+        function render() {
+            const currentTime = performance.now();
+            const deltaTime = currentTime - lastFrameTime;
+
+            if (deltaTime > frameDelay) {
+                lastFrameTime = currentTime;
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                // ctx.fillStyle = 'green';
+                // ctx.fillRect(0,0,canvas.width,canvas.height);
+                calculate_physics(rectangles);
+                for(let i = rectangles.length-1;i>-1;i--){
+                    rect = rectangles[i];
+                    ctx.fillStyle = `hsl(${i*30}, 100%, 50%)`;
+                    ctx.fillRect(rect.x, rect.y, rect.w, rect.h);
+                    ctx.font = cw20+'px Arial';
+                    ctx.fillStyle = 'black';
+                    ctx.fillText(rect.href,rect.x,rect.y+cw20);
+                }
+            }
+        }
+
+        homeLoop();
+
+        function calculate_physics(rectangles) {
+            for (let i = 0; i < rectangles.length; i++) {
+                calculate_collisions(i);
+                if (heldRectIndex === i) {
+                    heldRectLastCoords[0] = rectangles[heldRectIndex].x;
+                    heldRectLastCoords[1] = rectangles[heldRectIndex].y;
+                    // This one is controlled by user right now, no calculations on regular physics.
+                    continue;
+                }
+                if (gamepadHeldRectIndex === i) {
+                    // This one is controlled by user right now, no calculations on regular physics.
+                    continue;
+                }
+                let rect = rectangles[i];
+                if (Math.abs(rect.vx) < 0.1) {
+                    rect.vx = 0;
+                }
+                rect.x += rect.vx;
+                if (rect.x > canvas.width - rect.w - 20) {
+                    rect.x = canvas.width - rect.w - 20;
+                    rect.vx = -Math.abs(rect.vx);
+                }
+                if (rect.x < 20) {
+                    rect.x = 20;
+                    rect.vx = Math.abs(rect.vx);
+                }
+                if (rect.vy > 0) {
+                    if (rect.y < canvas.height - rect.h - 20) {
+                        rect.y += rect.vy;
+                        rect.vy += g;
+                    } else {
+                        rect.y = canvas.height - rect.h - 20;
+                        rect.vy = -rect.vy * rect.ec;
+                        if (Math.abs(rect.vy) < rect.ec * 3) {
+                            rect.vy = 0;
+                            rect.y = canvas.height - rect.h - 20;
+                        }
+                    }
+                } else if (rect.vy === 0 && rect.y === canvas.height - rect.h - 20) {
+                    if (rect.vx > 0) {
+                        rect.vx -= rect.ec / 8;
+                    }
+                    if (rect.vx < 0) {
+                        rect.vx += rect.ec / 8;
+                    }
+                } else {
+                    rect.y += rect.vy;
+                    rect.vy += g;
+                }
+            }
+        }
+
+
+        function calculate_collisions(index) {
+            let rect = rectangles[index];
+            for (let i = index + 1; i < rectangles.length; i++) {
+                if (rect.x + rect.w >= rectangles[i].x &&
+                    rect.x <= rectangles[i].x + rectangles[i].w &&
+                    rect.y + rect.h >= rectangles[i].y &&
+                    rect.y <= rectangles[i].y + rectangles[i].h) {
+
+                    let velocitySumX = Math.abs(rect.vx) + Math.abs(rectangles[i].vx);
+                    let velocitySumY = Math.abs(rect.vy) + Math.abs(rectangles[i].vy);
+
+                    let tempRectVx = rect.vx;
+                    let tempRectIVx = rectangles[i].vx;
+                    let tempRectVy = rect.vy;
+                    let tempRectIVy = rectangles[i].vy;
+
+                    let overlapX = Math.ceil((rect.w + rectangles[i].w) / 2 - Math.abs((rect.x + rect.w / 2) - (rectangles[i].x + rectangles[i].w / 2)));
+                    let overlapY = Math.ceil((rect.h + rectangles[i].h) / 2 - Math.abs((rect.y + rect.h / 2) - (rectangles[i].y + rectangles[i].h / 2)));
+                    if (overlapX < overlapY) {
+                        rect.vx = (velocitySumX * tempRectIVx) / (Math.abs(tempRectVx) + Math.abs(tempRectIVx)) - rect.ec;
+                        if (isNaN(rect.vx)) {
+                            rect.vx = 0;
+                        }
+                        rectangles[i].vx = (velocitySumX * tempRectVx) / (Math.abs(tempRectVx) + Math.abs(tempRectIVx)) - rectangles[i].ec;
+                        if (isNaN(rectangles[i].vx)) {
+                            rectangles[i].vx = 0;
+                        }
+                        if (rect.x < rectangles[i].x) {
+                            rect.x -= overlapX / 2;
+                            rectangles[i].x += overlapX / 2;
+                        } else {
+                            rect.x += overlapX / 2;
+                            rectangles[i].x -= overlapX / 2;
+                        }
+                    } else {
+                        rect.vy = (velocitySumY * tempRectIVy) / (Math.abs(tempRectVy) + Math.abs(tempRectIVy));
+                        if (isNaN(rect.vy)) {
+                            rect.vy = 0;
+                        }
+                        if (rect.vx > 0) {
+                            rect.vx -= rect.ec / 8;
+                        }
+                        if (rect.vx < 0) {
+                            rect.vx += rect.ec / 8;
+                        }
+                        rectangles[i].vy = (velocitySumY * tempRectVy) / (Math.abs(tempRectVy) + Math.abs(tempRectIVy));
+                        if (isNaN(rectangles[i].vy)) {
+                            rectangles[i].vy = 0;
+                        }
+                        if (rect.y < rectangles[i].y) {
+                            rect.y -= overlapY / 2;
+                            rectangles[i].y += overlapY / 2;
+                        } else {
+                            rect.y += overlapY / 2;
+                            rectangles[i].y -= overlapY / 2;
+                        }
+                    }
+                }
+            }
+        }
+
+
+
+
+        function getRandomInt(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        function openPage(index){
+            rectangles[index].w = 3*rectangles[index].w;
+            rectangles[index].h = 3*rectangles[index].h;
+        }
+        function shrinkPage(index){
+            rectangles[index].w = rectangles[index].w/3;
+            rectangles[index].h = rectangles[index].h/3;
+        }
+
+
+        function mouseClicked(e) {
+
+            if (e.button === 0) {
+                for(let i = 0; i < rectangles.length; i++) {
+                    if (
+                        mouseCoordinates[0] > rectangles[i].x &&
+                        mouseCoordinates[0] < rectangles[i].x + rectangles[i].w &&
+                        mouseCoordinates[1] > rectangles[i].y &&
+                        mouseCoordinates[1] < rectangles[i].y + rectangles[i].h
+                    ) {
+
+                        if (rectangles[i].shrink){
+                            openPage(i);
+                            rectangles[i].shrink = false;
+                            rectangles[i].static = true;
+                            rectangles[i].vx = 0;
+                            rectangles[i].vy = 0;
+                        }
+                        else{
+                            shrinkPage(i);
+                            rectangles[i].shrink = true;
+                            rectangles[i].static = false;
+                        }
+                        break;
+                    }
+                }
+            }
+
+            if (e.button === 2) {
+                for(let i = 0; i < rectangles.length; i++) {
+                    if (
+                        mouseCoordinates[0] > rectangles[i].x &&
+                        mouseCoordinates[0] < rectangles[i].x + rectangles[i].w &&
+                        mouseCoordinates[1] > rectangles[i].y &&
+                        mouseCoordinates[1] < rectangles[i].y + rectangles[i].h
+                    ) {
+                        heldRectOffset[0] = rectangles[i].x - mouseCoordinates[0];
+                        heldRectOffset[1] = rectangles[i].y - mouseCoordinates[1];
+                        heldRectIndex = i;
+                        break;
+                    }
+                }
+            }
+        }
+
+        function mouseReleased(e) {
+            if (e.button === 0) {
+                // if (clickedRectIndex != -1){
+                //     shrinkPage(clickedRectIndex);
+                //     clickedRectIndex= -1;
+                // }
+            }
+
+            if (e.button === 2) {
+                if (heldRectIndex != -1){
+                heldRectOffset[0] = 0;
+                heldRectOffset[1] = 0;
+                rectangles[heldRectIndex].vx = heldRectSpeed[0];
+                rectangles[heldRectIndex].vy = heldRectSpeed[1];
+                heldRectIndex= -1;
+                }
+            }
+        }
+        function mouseMoved(e) {
+            mouseCoordinates[0] = e.clientX - canvas.offsetLeft;
+            mouseCoordinates[1] = e.clientY - canvas.offsetTop;
+            if (heldRectIndex != -1){
+            rectangles[heldRectIndex].x = mouseCoordinates[0] + heldRectOffset[0];
+            rectangles[heldRectIndex].y = mouseCoordinates[1] + heldRectOffset[1];
+            rectangles[heldRectIndex].vx = 0;
+            rectangles[heldRectIndex].vy = 0;
+
+            const currentTime = performance.now()
+            let deltaX = rectangles[heldRectIndex].x - heldRectLastCoords[0];
+            let deltaY = rectangles[heldRectIndex].y - heldRectLastCoords[1];
+            heldRectSpeed[0] = 2*deltaX / (currentTime-lastFrameTime)
+            heldRectSpeed[1] = 2*deltaY / (currentTime-lastFrameTime)
+            }
+        }
+
+        canvas.addEventListener('mousedown', mouseClicked);
+        canvas.addEventListener('mouseup', mouseReleased);
+        canvas.addEventListener('mousemove', mouseMoved);
+
+</script>
+</body>
+</html>
