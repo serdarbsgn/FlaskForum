@@ -13,7 +13,9 @@
     </style>
 </head>
 <body>
+    {% if not hide_header %}
     {% include 'header.html' %}
+    {% endif %}
     <canvas id="gameCanvas" width="1200" height="1200" oncontextmenu="return false;"></canvas>
 
     <script>

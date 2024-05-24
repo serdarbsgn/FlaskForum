@@ -18,7 +18,9 @@
   </ul>
   {% endif %}
   {% endwith %}
+  {% if not hide_header %}
   {% include 'header.html' %}
+  {% endif %}
   {% if user %}
   <h1>Welcome {{ user }}</h1>
   <img src="{{ url_for('static', filename=picture) }}" alt="{{ user }}" style="width: 120px; height: 180px;">

@@ -18,7 +18,9 @@
   </ul>
   {% endif %}
   {% endwith %}
+  {% if not hide_header %}
   {% include 'header.html' %}
+  {% endif %}
   <h1>Games</h1>
   <p>These are the games I wrote in Java, then ported to JavaScript to play on browser.</p>
   <a href="{{url_for('snake_js')}}">Click Here to Play Snake</a>

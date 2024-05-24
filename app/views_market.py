@@ -21,8 +21,8 @@ def orders():
                 if order["order_id"] not in order_dict:
                     order_dict[order["order_id"]] = [order]
                 else: order_dict[order["order_id"]].append(order)
-            return render_template('orders.html',user=user["username"],picture = profile_photos_dir+user["picture"]["profile_picture"],orders=order_dict)
-    return redirect(url_for('home')),401
+            return render_template('orders.html',user=user["username"],picture = profile_photos_dir+user["picture"]["profile_picture"],orders=order_dict,hide_header = request.args.get('hide_header',False,type=bool))
+    return redirect(url_for('home',hide_header = request.args.get('hide_header',False,type=bool))),401
 
 @app.route('/cart', methods=['GET'])
 def cart():
@@ -33,8 +33,8 @@ def cart():
             total = 0
             for item in cart_items:
                 total += item["quantity"]*item["price"]
-            return render_template('cart.html',user=user["username"],picture = profile_photos_dir+user["picture"]["profile_picture"],cart_items=cart_items,total=total,form=RemoveFromCartForm(),form2=UpdateCartForm())
-    return redirect(url_for('home')),401
+            return render_template('cart.html',user=user["username"],picture = profile_photos_dir+user["picture"]["profile_picture"],cart_items=cart_items,total=total,form=RemoveFromCartForm(),form2=UpdateCartForm(),hide_header = request.args.get('hide_header',False,type=bool))
+    return redirect(url_for('home',hide_header = request.args.get('hide_header',False,type=bool))),401
 
 @app.route('/market', methods=['GET'])
 def market():
@@ -45,8 +45,8 @@ def market():
             product["image"] = product_photos_dir+product["image"]
         if "user" in session:
             user =  get_user_info(sql)
-            return render_template('market.html',products = products,form = form,user=user["username"],picture = profile_photos_dir+user["picture"]["profile_picture"])
-        return render_template('market.html',products = products,form = form)
+            return render_template('market.html',products = products,form = form,user=user["username"],picture = profile_photos_dir+user["picture"]["profile_picture"],hide_header = request.args.get('hide_header',False,type=bool))
+        return render_template('market.html',products = products,form = form,hide_header = request.args.get('hide_header',False,type=bool))
 
 @app.route('/add-to-cart', methods=['POST'])
 def add_to_cart():
@@ -66,8 +66,8 @@ def add_to_cart():
                 check = sql.session.execute(Select.cart({"user":user})).fetchall()
                 sql.execute(Insert.cart_item({"cart_id":check[0]["id"],"product_id":form.product_id._value()}))
                 sql.session.commit()
-                return redirect(url_for('cart'))
-    return redirect(url_for('login'))
+                return redirect(url_for('cart',hide_header = request.args.get('hide_header',False,type=bool)))
+    return redirect(url_for('login',hide_header = request.args.get('hide_header',False,type=bool)))
 
 @app.route('/remove-from-cart',methods=['POST'])
 def remove_from_cart():
@@ -82,8 +82,8 @@ def remove_from_cart():
                     return "This is wrong and its all your fault",400 
                 sql.execute(Delete.cart_item({"cart_id":check[0]["id"],"product_id":form.product_id._value()}))
                 sql.session.commit()
-                return redirect(url_for('cart'))
-    return redirect(url_for('login'))
+                return redirect(url_for('cart',hide_header = request.args.get('hide_header',False,type=bool)))
+    return redirect(url_for('login',hide_header = request.args.get('hide_header',False,type=bool)))
 
 @app.route('/update-cart',methods=['POST'])
 def update_cart():
@@ -98,8 +98,8 @@ def update_cart():
                     return "This is wrong and its all your fault",400 
                 if sql.execute(Update.cart_item({"cart_id":check[0]["id"],"product_id":form.product_id._value(),"quantity":form.quantity._value()})):
                     sql.session.commit()
-                return redirect(url_for('cart'))
-    return redirect(url_for('login'))
+                return redirect(url_for('cart',hide_header = request.args.get('hide_header',False,type=bool)))
+    return redirect(url_for('login',hide_header = request.args.get('hide_header',False,type=bool)))
 
 @app.route('/add-product', methods=['GET', 'POST'])
 def add_product():
@@ -158,7 +158,7 @@ def add_product():
 @app.route('/checkout', methods=['GET'])
 def checkout():
     if "user" not in session:
-        return redirect(url_for('login'))
+        return redirect(url_for('login',hide_header = request.args.get('hide_header',False,type=bool)))
     user =  session["user"]
     with sqlconn() as sql:
         cart_items = sql.session.execute(Select.cart_item({"user":user})).mappings().fetchall()
@@ -186,7 +186,7 @@ def checkout():
         for item in cart_items:
             total += item["quantity"]*item["price"]
     flash(f'We got your order, total price is:{total}')
-    return redirect(url_for('orders'))
+    return redirect(url_for('orders',hide_header = request.args.get('hide_header',False,type=bool)))
 
 
 def listify(map):

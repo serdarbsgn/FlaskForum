@@ -19,7 +19,9 @@
   </ul>
   {% endif %}
   {% endwith %}
+  {% if not hide_header %}
   {% include 'header.html' %}
+  {% endif %}
   <h1>Forum List</h1>
   <ul>
     {% for forum in forums %}
@@ -35,7 +37,7 @@
       {% if i == page %}
         <span class="page-number-link">{{ i }}</span>
       {% else %}
-        <a href="{{ url_for('forums_page', page=i) }}" class="page-number-link">{{ i }}</a>
+        <a href="{{ url_for('forums_page', page=i,hide_header=hide_header) }}" class="page-number-link">{{ i }}</a>
       {% endif %}
     {% endfor %}
   </div>

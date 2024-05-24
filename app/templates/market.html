@@ -18,7 +18,9 @@
   </ul>
   {% endif %}
   {% endwith %}
+  {% if not hide_header %}
   {% include 'header.html' %}
+  {% endif %}
   {% if user %}
   {% endif %}
   <div class="products-grid">
