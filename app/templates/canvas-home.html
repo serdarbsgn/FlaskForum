@@ -245,7 +245,8 @@
             rectangles[index].w = ctx.measureText(rectangles[index].href).width*magnitude;
             rectangles[index].h = ch10*magnitude;
             if(magnitude > 3){
-                window.location.href = rectangles[index].href;
+                const windowFeatures = `width=${rectangles[index].w},height=${rectangles[index].h},left=${rectangles[index].x},top=${rectangles[index].y}`;
+                window.open(rectangles[index].href, '_blank', windowFeatures);
             }
         }
         function resetPage(index){
