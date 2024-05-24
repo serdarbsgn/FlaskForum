@@ -21,15 +21,16 @@
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
         const ch10 = canvas.height/10;
+        const ch5 = ch10*2;
         const cw10 = canvas.width/10;
         const cw20 = cw10/2;
         const  rectangles = [
-        {"x":0,"y":-ch10,"w":cw10,"h":ch10,"vx":getRandomInt(-3,3),"vy":0,"ec":getRandomInt(25,75)/100,"static":false,"href":"/home","shrink":true},
-        {"x":0,"y":-2*ch10,"w":cw10,"h":ch10,"vx":getRandomInt(-3,3),"vy":0,"ec":getRandomInt(25,75)/100,"static":false,"href":"/forums","shrink":true},
-        {"x":0,"y":-3*ch10,"w":cw10,"h":ch10,"vx":getRandomInt(-3,3),"vy":0,"ec":getRandomInt(25,75)/100,"static":false,"href":"/market","shrink":true},
-        {"x":0,"y":-4*ch10,"w":cw10,"h":ch10,"vx":getRandomInt(-3,3),"vy":0,"ec":getRandomInt(25,75)/100,"static":false,"href":"/games","shrink":true},
-        {"x":0,"y":-5*ch10,"w":cw10,"h":ch10,"vx":getRandomInt(-3,3),"vy":0,"ec":getRandomInt(25,75)/100,"static":false,"href":"/login","shrink":true},
-        {"x":0,"y":-6*ch10,"w":cw10,"h":ch10,"vx":getRandomInt(-3,3),"vy":0,"ec":getRandomInt(25,75)/100,"static":false,"href":"/register","shrink":true}
+        {"x":0,"y":-ch10,"w":cw10,"h":ch10,"vx":getRandomInt(-3,3),"vy":0,"ec":getRandomInt(25,60)/100,"static":false,"href":"/home","shrink":true,"magnitude":1},
+        {"x":0,"y":-2*ch10,"w":cw10,"h":ch10,"vx":getRandomInt(-3,3),"vy":0,"ec":getRandomInt(25,60)/100,"static":false,"href":"/forums","shrink":true,"magnitude":1},
+        {"x":0,"y":-3*ch10,"w":cw10,"h":ch10,"vx":getRandomInt(-3,3),"vy":0,"ec":getRandomInt(25,60)/100,"static":false,"href":"/market","shrink":true,"magnitude":1},
+        {"x":0,"y":-4*ch10,"w":cw10,"h":ch10,"vx":getRandomInt(-3,3),"vy":0,"ec":getRandomInt(25,60)/100,"static":false,"href":"/games","shrink":true,"magnitude":1},
+        {"x":0,"y":-5*ch10,"w":cw10,"h":ch10,"vx":getRandomInt(-3,3),"vy":0,"ec":getRandomInt(25,60)/100,"static":false,"href":"/login","shrink":true,"magnitude":1},
+        {"x":0,"y":-6*ch10,"w":cw10,"h":ch10,"vx":getRandomInt(-3,3),"vy":0,"ec":getRandomInt(25,60)/100,"static":false,"href":"/register","shrink":true,"magnitude":1}
         ]
         let lastFrameTime = 0;
         const frameDelay = 1000 / 165;
@@ -39,6 +40,9 @@
         const heldRectOffset=[0,0];
         let heldRectIndex = -1;
         let gamepadHeldRectIndex = -1;
+        let gamepadConnected = 0;
+        let gamepadArrowDelay = 15;
+        let highlightRectPad = 0;
         const g = 0.5;
         let clickedRectIndex = -1;
 
@@ -80,6 +84,12 @@
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 // ctx.fillStyle = 'green';
                 // ctx.fillRect(0,0,canvas.width,canvas.height);
+                if (gamepadConnected>0 ){
+                    if(gamepadArrowDelay > 0){gamepadArrowDelay--;}
+                    updateGamepadStatus()
+                    ctx.fillStyle = `hsl(${Math.floor(180)}, 0%, 50%)`;
+                    ctx.fillRect(rectangles[highlightRectPad].x-5, rectangles[highlightRectPad].y-5, rectangles[highlightRectPad].w+10, rectangles[highlightRectPad].h+10);
+                }
                 calculate_physics(rectangles);
                 for(let i = rectangles.length-1;i>-1;i--){
                     rect = rectangles[i];
@@ -87,7 +97,7 @@
                     ctx.fillRect(rect.x, rect.y, rect.w, rect.h);
                     ctx.font = cw20+'px Arial';
                     ctx.fillStyle = 'black';
-                    ctx.fillText(rect.href,rect.x,rect.y+cw20);
+                    ctx.fillText(rect.href,rect.x,rect.y+cw20*4/5);
                 }
             }
         }
@@ -97,6 +107,15 @@
         function calculate_physics(rectangles) {
             for (let i = 0; i < rectangles.length; i++) {
                 calculate_collisions(i);
+                if (rectangles[i].shrink){
+                    if(rectangles[i].magnitude > 1){
+                        rectangles[i].magnitude -= 0.05;
+                        changePageSize(i,rectangles[i].magnitude)}
+                }else if (!rectangles[i].shrink){
+                    if(rectangles[i].magnitude < 3){
+                        rectangles[i].magnitude += 0.05;
+                        changePageSize(i,rectangles[i].magnitude)}
+                }
                 if (heldRectIndex === i) {
                     heldRectLastCoords[0] = rectangles[heldRectIndex].x;
                     heldRectLastCoords[1] = rectangles[heldRectIndex].y;
@@ -215,15 +234,16 @@
             return Math.floor(Math.random() * (max - min + 1)) + min;
         }
 
-        function openPage(index){
-            rectangles[index].w = 3*rectangles[index].w;
-            rectangles[index].h = 3*rectangles[index].h;
+        function changePageSize(index,magnitude){
+            ctx.font = cw20+'px Arial';
+            rectangles[index].w = ctx.measureText(rectangles[index].href).width*magnitude;
+            rectangles[index].h = ch10*magnitude;
         }
-        function shrinkPage(index){
-            rectangles[index].w = rectangles[index].w/3;
-            rectangles[index].h = rectangles[index].h/3;
+        function resetPage(index){
+            ctx.font = cw20+'px Arial';
+            rectangles[index].w = ctx.measureText(rectangles[index].href).width;
+            rectangles[index].h = ch10;
         }
-
 
         function mouseClicked(e) {
 
@@ -235,16 +255,13 @@
                         mouseCoordinates[1] > rectangles[i].y &&
                         mouseCoordinates[1] < rectangles[i].y + rectangles[i].h
                     ) {
-
                         if (rectangles[i].shrink){
-                            openPage(i);
                             rectangles[i].shrink = false;
                             rectangles[i].static = true;
                             rectangles[i].vx = 0;
                             rectangles[i].vy = 0;
                         }
                         else{
-                            shrinkPage(i);
                             rectangles[i].shrink = true;
                             rectangles[i].static = false;
                         }
@@ -272,10 +289,7 @@
 
         function mouseReleased(e) {
             if (e.button === 0) {
-                // if (clickedRectIndex != -1){
-                //     shrinkPage(clickedRectIndex);
-                //     clickedRectIndex= -1;
-                // }
+
             }
 
             if (e.button === 2) {
@@ -300,14 +314,91 @@
             const currentTime = performance.now()
             let deltaX = rectangles[heldRectIndex].x - heldRectLastCoords[0];
             let deltaY = rectangles[heldRectIndex].y - heldRectLastCoords[1];
-            heldRectSpeed[0] = 2*deltaX / (currentTime-lastFrameTime)
-            heldRectSpeed[1] = 2*deltaY / (currentTime-lastFrameTime)
+            heldRectSpeed[0] = deltaX / (currentTime-lastFrameTime)
+            heldRectSpeed[1] = deltaY / (currentTime-lastFrameTime)
             }
         }
 
         canvas.addEventListener('mousedown', mouseClicked);
         canvas.addEventListener('mouseup', mouseReleased);
         canvas.addEventListener('mousemove', mouseMoved);
+
+
+        window.addEventListener("gamepadconnected", (event) => {
+            gamepadConnected += 1;
+        });
+
+        window.addEventListener("gamepaddisconnected", (event) => {
+            gamepadConnected -= 1;
+        });
+
+        function updateGamepadStatus() {
+            const currentGamepads = navigator.getGamepads();
+            let gp = currentGamepads[0];
+            let buttonPressed = false;
+
+            if (gp) {
+                for (let j = 0; j < gp.buttons.length; j++) {
+                    if (gp.buttons[j].pressed) {
+                        if (j == 14) { // Left arrow on Xbox controller
+                            if (gamepadArrowDelay <= 0) {
+                                highlightRectPad = Math.max(-1, highlightRectPad - 1);
+                                if (highlightRectPad == -1) {
+                                    highlightRectPad = rectangles.length - 1;
+                                }
+                                gamepadArrowDelay = 15;
+                            }
+                        } else if (j == 15) { // Right arrow on Xbox controller
+                            if (gamepadArrowDelay <= 0) {
+                                highlightRectPad = Math.min(rectangles.length, highlightRectPad + 1);
+                                if (highlightRectPad == rectangles.length) {
+                                    highlightRectPad = 0;
+                                }
+                                gamepadArrowDelay = 15;
+                            }
+                        } else if(j == 0){
+                            if (gamepadArrowDelay <= 0) {
+                                if (rectangles[highlightRectPad].shrink){
+                                    rectangles[highlightRectPad].shrink = false;
+                                    rectangles[highlightRectPad].static = true;
+                                    rectangles[highlightRectPad].vx = 0;
+                                    rectangles[highlightRectPad].vy = 0;
+                                    }
+                                else{
+                                    rectangles[highlightRectPad].shrink = true;
+                                    rectangles[highlightRectPad].static = false;
+                                }
+                                gamepadArrowDelay = 15;
+                            }
+                        }else { // Other buttons for holding object in place
+                            gamepadHeldRectIndex = highlightRectPad;
+                            rectangles[gamepadHeldRectIndex].vx = 0;
+                            rectangles[gamepadHeldRectIndex].vy = 0;
+                            buttonPressed = true;
+                        }
+                    }
+                }
+
+                if (!buttonPressed) {
+                    gamepadHeldRectIndex = -1;
+                }
+
+                for (let k = 0; k < gp.axes.length; k++) {
+                    if (Math.abs(gp.axes[k]) > 0.1) { // Simple dead zone check
+                        if (gamepadHeldRectIndex != -1) {
+                            if (k == 1) { // Left analog's y axis
+                                rectangles[gamepadHeldRectIndex].y += gp.axes[k] * 5;
+                                rectangles[gamepadHeldRectIndex].vy = gp.axes[k] * 5;
+                            }
+                            if (k == 0) { // Left analog's x axis
+                                rectangles[gamepadHeldRectIndex].x += gp.axes[k] * 5;
+                                rectangles[gamepadHeldRectIndex].vx = gp.axes[k] * 5;
+                            }
+                        }
+                    }
+                }
+            }
+        }
 
 </script>
 </body>
