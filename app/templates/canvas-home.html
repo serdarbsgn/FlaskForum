@@ -10,6 +10,11 @@
             display: block;/*Never change this if you want to work with mouse listeners because in styles.css, body has flex attribute that carries over to canvas element.*/
             margin: auto;
         }
+        .iframe-container {
+            position: absolute;
+            display: none;
+            border: none;
+        }
     </style>
 </head>
 <body>
@@ -25,13 +30,16 @@
         const cw10 = canvas.width/10;
         const cw20 = cw10/2;
         const  rectangles = [
-        {"x":0,"y":-ch10,"w":cw10,"h":ch10,"vx":getRandomInt(-3,3),"vy":0,"ec":getRandomInt(25,60)/100,"static":false,"href":"/home","shrink":true,"magnitude":1,"dataFetched":false,"apiData":null},
-        {"x":0,"y":-2*ch10,"w":cw10,"h":ch10,"vx":getRandomInt(-3,3),"vy":0,"ec":getRandomInt(25,60)/100,"static":false,"href":"/forums","shrink":true,"magnitude":1,"dataFetched":false,"apiData":null},
-        {"x":0,"y":-3*ch10,"w":cw10,"h":ch10,"vx":getRandomInt(-3,3),"vy":0,"ec":getRandomInt(25,60)/100,"static":false,"href":"/market","shrink":true,"magnitude":1,"dataFetched":false,"apiData":null},
-        {"x":0,"y":-4*ch10,"w":cw10,"h":ch10,"vx":getRandomInt(-3,3),"vy":0,"ec":getRandomInt(25,60)/100,"static":false,"href":"/games","shrink":true,"magnitude":1,"dataFetched":false,"apiData":null},
-        {"x":0,"y":-5*ch10,"w":cw10,"h":ch10,"vx":getRandomInt(-3,3),"vy":0,"ec":getRandomInt(25,60)/100,"static":false,"href":"/login","shrink":true,"magnitude":1,"dataFetched":false,"apiData":null},
-        {"x":0,"y":-6*ch10,"w":cw10,"h":ch10,"vx":getRandomInt(-3,3),"vy":0,"ec":getRandomInt(25,60)/100,"static":false,"href":"/register","shrink":true,"magnitude":1,"dataFetched":false,"apiData":null}
+        {"x":0,"y":-ch10,"w":cw10,"h":ch10,"vx":getRandomInt(-3,3),"vy":0,"ec":getRandomInt(25,60)/100,"static":false,"href":"/home","shrink":true,"magnitude":1,"iframe":null},
+        {"x":0,"y":-2*ch10,"w":cw10,"h":ch10,"vx":getRandomInt(-3,3),"vy":0,"ec":getRandomInt(25,60)/100,"static":false,"href":"/forums","shrink":true,"magnitude":1,"iframe":null},
+        {"x":0,"y":-3*ch10,"w":cw10,"h":ch10,"vx":getRandomInt(-3,3),"vy":0,"ec":getRandomInt(25,60)/100,"static":false,"href":"/market","shrink":true,"magnitude":1,"iframe":null},
+        {"x":0,"y":-4*ch10,"w":cw10,"h":ch10,"vx":getRandomInt(-3,3),"vy":0,"ec":getRandomInt(25,60)/100,"static":false,"href":"/games","shrink":true,"magnitude":1,"iframe":null},
+        {"x":0,"y":-5*ch10,"w":cw10,"h":ch10,"vx":getRandomInt(-3,3),"vy":0,"ec":getRandomInt(25,60)/100,"static":false,"href":"/login","shrink":true,"magnitude":1,"iframe":null},
+        {"x":0,"y":-6*ch10,"w":cw10,"h":ch10,"vx":getRandomInt(-3,3),"vy":0,"ec":getRandomInt(25,60)/100,"static":false,"href":"/register","shrink":true,"magnitude":1,"iframe":null}
         ]
+        const iframeContainer = document.createElement('div');
+        iframeContainer.className = 'iframe-container';
+        document.body.appendChild(iframeContainer);
         let lastFrameTime = 0;
         const frameDelay = 1000 / 165;
         const mouseCoordinates = [0,0];
@@ -99,15 +107,14 @@
                     ctx.font = cw20+'px Arial';
                     ctx.fillStyle = 'black';
                     ctx.fillText(rect.href,rect.x,rect.y+cw20*4/5);
+                    if(rect.iframe){
+                        rect.iframe.style.left = `${rect.x}px`;
+                        rect.iframe.style.top = `${rect.y}px`;
+                    }
                 }
             }
         }
-        function renderLoginForm(rect) {
-            // Render input field labels
-            ctx.fillStyle = 'black';
-            ctx.fillText('Username:', rect.x, rect.y+(cw20*2));
-            ctx.fillText('Password:', rect.x, rect.y+(cw20*3));
-}
+
         homeLoop();
 
         function calculate_physics(rectangles) {
@@ -244,10 +251,31 @@
             ctx.font = cw20+'px Arial';
             rectangles[index].w = ctx.measureText(rectangles[index].href).width*magnitude;
             rectangles[index].h = ch10*magnitude;
+            let r = rectangles[index];
             if(magnitude > 3){
-                const windowFeatures = `width=${rectangles[index].w},height=${rectangles[index].h},left=${rectangles[index].x},top=${rectangles[index].y}`;
-                window.open(rectangles[index].href, '_blank', windowFeatures);
+                r.iframe = document.createElement('iframe');
+                r.iframe.src = r.href;
+                r.iframe.style.width = '100%';
+                r.iframe.style.height = '100%';
+                r.iframe.style.left = `${r.x+5}px`;
+                r.iframe.style.top = `${r.y+5}px`;
+                r.iframe.style.width = `${r.w-10}px`;
+                r.iframe.style.height = `${r.h-10}px`;
+                r.iframe.style.position = 'absolute';
+                document.body.appendChild(r.iframe);
+                
+                // const windowFeatures = `width=${rectangles[index].w},height=${rectangles[index].h},left=${rectangles[index].x},top=${rectangles[index].y}`;
+                // window.open(rectangles[index].href, '_blank', windowFeatures);
             }
+            if(magnitude<3)
+            {
+                if(r.iframe){
+                    r.iframe.style.display = 'none';
+                    document.body.removeChild(r.iframe);
+                    r.iframe = null;
+                }
+            }
+            
         }
         function resetPage(index){
             ctx.font = cw20+'px Arial';
