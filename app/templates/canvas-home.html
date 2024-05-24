@@ -257,11 +257,12 @@
                 r.iframe.src = r.href;
                 r.iframe.style.width = '100%';
                 r.iframe.style.height = '100%';
-                r.iframe.style.left = `${r.x+5}px`;
-                r.iframe.style.top = `${r.y+5}px`;
-                r.iframe.style.width = `${r.w-10}px`;
-                r.iframe.style.height = `${r.h-10}px`;
+                r.iframe.style.left = `${r.x}px`;
+                r.iframe.style.top = `${r.y}px`;
+                r.iframe.style.width = `${r.w-20}px`;
+                r.iframe.style.height = `${r.h-20}px`;
                 r.iframe.style.position = 'absolute';
+                r.iframe.setAttribute('oncontextmenu', 'return false;');
                 document.body.appendChild(r.iframe);
                 
                 // const windowFeatures = `width=${rectangles[index].w},height=${rectangles[index].h},left=${rectangles[index].x},top=${rectangles[index].y}`;
