@@ -143,7 +143,7 @@
                         rectangles[i].magnitude -= 0.05;
                         changePageSize(i,rectangles[i].magnitude)}
                 }else if (!rectangles[i].shrink){
-                    if(rectangles[i].magnitude < max_magnitude){
+                    if(rectangles[i].magnitude < max_magnitude-0.04){
                         rectangles[i].magnitude += 0.05;
                         changePageSize(i,rectangles[i].magnitude)}
                 }
