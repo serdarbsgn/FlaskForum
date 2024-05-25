@@ -8,8 +8,7 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
 
-<body>
-  
+<body {% if hide_header %} oncontextmenu="return false;" {% endif %}>
   {% with messages = get_flashed_messages() %}
   {% if messages %}
   <ul class=flashes>

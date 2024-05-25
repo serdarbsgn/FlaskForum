@@ -12,7 +12,7 @@
         }
     </style>
 </head>
-<body>
+<body {% if hide_header %} oncontextmenu="return false;" {% endif %}>
     {% if not hide_header %}
     {% include 'header.html' %}
     {% endif %}
