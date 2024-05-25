@@ -30,6 +30,7 @@
         const ch5 = ch10*2;
         const cw10 = canvas.width/10;
         const cw20 = cw10/2;
+        const max_magnitude = 3;
         {% if user %}
         const  rectangles = [
         {"x":0,"y":-ch10,"w":cw10,"h":ch10,"vx":getRandomInt(-3,3),"vy":0,"ec":getRandomInt(25,60)/100,"static":false,"href":"/home","shrink":true,"magnitude":1,"iframe":null},
@@ -113,11 +114,13 @@
                 calculate_physics(rectangles);
                 for(let i = rectangles.length-1;i>-1;i--){
                     let rect = rectangles[i];
-                    if(!rect.shrink&&rect.iframe&&rect.magnitude>3){
+                    if(!rect.shrink&&rect.iframe&&rect.magnitude>max_magnitude){
                         ctx.fillStyle = `hsl(${i*30}, 100%, 50%)`;
                         ctx.fillRect(rect.x+rect.w-cw20, rect.y-ch20/2, cw20, ch20/2);
                         rect.iframe.style.left = `${rect.x}px`;
                         rect.iframe.style.top = `${rect.y}px`;
+                        rect.iframe.style.width = `${rect.w}px`;
+                        rect.iframe.style.height = `${rect.h}px`;
                     }
                     else{
                         ctx.fillStyle = `hsl(${i*30}, 100%, 50%)`;
@@ -140,7 +143,7 @@
                         rectangles[i].magnitude -= 0.05;
                         changePageSize(i,rectangles[i].magnitude)}
                 }else if (!rectangles[i].shrink){
-                    if(rectangles[i].magnitude < 3){
+                    if(rectangles[i].magnitude < max_magnitude){
                         rectangles[i].magnitude += 0.05;
                         changePageSize(i,rectangles[i].magnitude)}
                 }
@@ -264,10 +267,21 @@
 
         function changePageSize(index,magnitude){
             ctx.font = cw20+'px Arial';
-            rectangles[index].w = ctx.measureText(rectangles[index].href).width*magnitude;
-            rectangles[index].h = ch10*magnitude;
+            let abs_width_x = ctx.measureText(rectangles[index].href).width*magnitude;
+            let abs_width_y = ch10*magnitude;
+            if(canvas.width < abs_width_x){
+                magnitude = rectangles[index].magnitude - 0.05;
+            }else if(canvas.height < abs_width_y){
+                magnitude = rectangles[index].magnitude - 0.05;
+            }else if(magnitude < 1){
+                magnitude = 0.99;
+            }else{
+                rectangles[index].magnitude = magnitude;
+                rectangles[index].w = ctx.measureText(rectangles[index].href).width*magnitude;
+                rectangles[index].h = ch10*magnitude;}
+                
             let r = rectangles[index];
-            if(magnitude > 3){
+            if(magnitude > max_magnitude){
                 if(!r.iframe){
                 r.iframe = document.createElement('iframe');
                 r.iframe.src = r.href+"?hide_header=1";
@@ -282,12 +296,17 @@
                 document.body.appendChild(r.iframe);}
                 else{
                     r.iframe.style.display = 'block';
+                    r.iframe.style.left = `${r.x}px`;
+                    r.iframe.style.top = `${r.y}px`;
+                    r.iframe.style.width = `${r.w}px`;
+                    r.iframe.style.height = `${r.h}px`;
+                    r.iframe.style.position = 'absolute'
                 }
                 //iframe works better imo.
                 // const windowFeatures = `width=${rectangles[index].w},height=${rectangles[index].h},left=${rectangles[index].x},top=${rectangles[index].y}`;
                 // window.open(rectangles[index].href, '_blank', windowFeatures);
             }
-            if(magnitude<3)
+            if(magnitude<max_magnitude)
             {
                 if(r.iframe){
                     r.iframe.style.display = 'none';
@@ -404,6 +423,76 @@
             }
         }
 
+        function mouseWheel(e){
+            direction = Math.sign(e.deltaY)
+            if(direction<0){
+                for(let i = 0; i < rectangles.length; i++) {
+
+                    if (
+                        mouseCoordinates[0] > rectangles[i].x &&
+                        mouseCoordinates[0] < rectangles[i].x + rectangles[i].w &&
+                        mouseCoordinates[1] > rectangles[i].y &&
+                        mouseCoordinates[1] < rectangles[i].y + rectangles[i].h && rectangles[i].magnitude<3
+                    ) {
+                        rectangles[i].magnitude += 0.1;
+                        let magnitude = rectangles[i].magnitude+ 0.05;
+                        if(rectangles[i].magnitude>max_magnitude){
+                            
+                            rectangles[i].shrink = false;
+                        }
+                        changePageSize(i,magnitude)
+                        break;
+                    }
+                    else if(
+                        mouseCoordinates[0] > rectangles[i].x+rectangles[i].w -cw20 &&
+                        mouseCoordinates[0] < rectangles[i].x+rectangles[i].w  &&
+                        mouseCoordinates[1] > rectangles[i].y-ch20/2 &&
+                        mouseCoordinates[1] < rectangles[i].y && !rectangles[i].shrink
+                    ){
+                        rectangles[i].magnitude += 0.1;
+                        let magnitude = rectangles[i].magnitude + 0.05;
+                        if(rectangles[i].magnitude>max_magnitude){
+                            rectangles[i].shrink = false;
+                        }
+                        changePageSize(i,magnitude)
+                        break;
+                    }
+                }
+            }else if(direction>0){
+                for(let i = 0; i < rectangles.length; i++) {
+
+                if (
+                    mouseCoordinates[0] > rectangles[i].x &&
+                    mouseCoordinates[0] < rectangles[i].x + rectangles[i].w &&
+                    mouseCoordinates[1] > rectangles[i].y &&
+                    mouseCoordinates[1] < rectangles[i].y + rectangles[i].h && rectangles[i].magnitude<3
+                ) {
+                    rectangles[i].magnitude -= 0.1;
+                    let magnitude = rectangles[i].magnitude-0.05;
+                    if(rectangles[i].magnitude<max_magnitude){
+                        rectangles[i].shrink = true;
+                    }
+                    changePageSize(i,magnitude)
+                    break;
+                }
+                else if(
+                    mouseCoordinates[0] > rectangles[i].x+rectangles[i].w -cw20 &&
+                    mouseCoordinates[0] < rectangles[i].x+rectangles[i].w  &&
+                    mouseCoordinates[1] > rectangles[i].y-ch20/2 &&
+                    mouseCoordinates[1] < rectangles[i].y && !rectangles[i].shrink
+                ){
+                    rectangles[i].magnitude -= 0.1;
+                    let magnitude = rectangles[i].magnitude-0.05;
+                    if(rectangles[i].magnitude < max_magnitude){
+                        rectangles[i].shrink = true;
+                    }
+                    changePageSize(i,magnitude)
+                    break;
+                }
+                }
+            }
+        }
+        canvas.addEventListener('wheel',mouseWheel);
         canvas.addEventListener('mousedown', mouseClicked);
         canvas.addEventListener('mouseup', mouseReleased);
         canvas.addEventListener('mousemove', mouseMoved);
