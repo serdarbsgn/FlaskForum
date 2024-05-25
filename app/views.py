@@ -67,6 +67,8 @@ def login():
         check = sql.session.execute(Select.user_exists_username_password(({"username":form.username._value(),"password":generate_hash(form.password._value())}))).mappings().fetchall()
         if len(check)>0:
             session["user"] = check[0]["id"]
+            if request.args.get('hide_header',0,type=int):
+                return '<script>parent.postMessage({"response":"Logged In"});</script>'
             return redirect(url_for('home',hide_header = request.args.get('hide_header',0,type=int))),200
         else: 
             flash("You are a fraud")
@@ -158,6 +160,8 @@ def logout():
         session.pop('user', None)
         session.pop('username',None)
         session.pop('picture',None)
+    if request.args.get('hide_header',0,type=int):
+        return '<script>parent.postMessage({"response":"Logged Out"});</script>'
     return redirect(url_for('home',hide_header = request.args.get('hide_header',0,type=int))),200
 
 @app.route('/', methods=['GET'])

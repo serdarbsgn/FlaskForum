@@ -143,7 +143,7 @@
                         rectangles[i].magnitude -= 0.05;
                         changePageSize(i,rectangles[i].magnitude)}
                 }else if (!rectangles[i].shrink){
-                    if(rectangles[i].magnitude < max_magnitude-0.04){
+                    if(rectangles[i].magnitude < max_magnitude){
                         rectangles[i].magnitude += 0.05;
                         changePageSize(i,rectangles[i].magnitude)}
                 }
@@ -275,6 +275,8 @@
                 magnitude = rectangles[index].magnitude - 0.05;
             }else if(magnitude < 1){
                 magnitude = 0.99;
+                rectangles[index].w = ctx.measureText(rectangles[index].href).width*magnitude;
+                rectangles[index].h = ch10*magnitude;
             }else{
                 rectangles[index].magnitude = magnitude;
                 rectangles[index].w = ctx.measureText(rectangles[index].href).width*magnitude;
@@ -573,6 +575,16 @@
                 }
             }
         }
+
+        function listenIframeMessage(message){
+            if(message.data.response=='Logged In'){
+                window.location.reload()
+            }
+            else if(message.data.response=='Logged Out'){
+                window.location.reload()
+            }
+        }
+        window.addEventListener('message',listenIframeMessage)
 
 </script>
 </body>
