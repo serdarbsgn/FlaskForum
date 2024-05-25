@@ -18,6 +18,9 @@
   </ul>
   {% endif %}
   {% endwith %}
+  {% if not hide_header %}
+  {% include 'header.html' %}
+  {% endif %}
   <h1>User Login</h1>
   <form method="POST" action="{{ url_for('login') }}">
     {{ form.csrf_token }}

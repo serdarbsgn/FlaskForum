@@ -25,8 +25,8 @@ def forum_page():
         postcount = (postcount["count"]-1)//10
         if "user" in session:
             user_info = get_user_info(sql)
-            return render_template('forum.html',user=user_info["username"],picture = profile_photos_dir+user_info["picture"]["profile_picture"],contents = contents,posts = posts,postcount=postcount,hide_header = request.args.get('hide_header',False,type=bool))
-        return render_template('forum.html',contents = contents,posts = posts,postcount=postcount,hide_header = request.args.get('hide_header',False,type=bool))
+            return render_template('forum.html',user=user_info["username"],picture = profile_photos_dir+user_info["picture"]["profile_picture"],contents = contents,posts = posts,postcount=postcount,hide_header = request.args.get('hide_header',0,type=int))
+        return render_template('forum.html',contents = contents,posts = posts,postcount=postcount,hide_header = request.args.get('hide_header',0,type=int))
 
 
 @app.route('/forums', methods=['GET'])
@@ -42,15 +42,15 @@ def forums_page():
         forumcount = (forumcount["count"]-1)//5
         if "user" in session:
             user_info = get_user_info(sql)
-            return render_template('forums.html',forums = forums,user=user_info["username"],picture = profile_photos_dir+user_info["picture"]["profile_picture"],page_count=forumcount,hide_header = request.args.get('hide_header',False,type=bool))
-        return render_template('forums.html',forums = forums,page_count=forumcount,hide_header = request.args.get('hide_header',False,type=bool))
+            return render_template('forums.html',forums = forums,user=user_info["username"],picture = profile_photos_dir+user_info["picture"]["profile_picture"],page_count=forumcount,hide_header = request.args.get('hide_header',0,type=int))
+        return render_template('forums.html',forums = forums,page_count=forumcount,hide_header = request.args.get('hide_header',0,type=int))
 
 @app.route('/create/forum',methods=['GET','POST'])
 def create_forum():
     form = CreateForumForm()
     if form.validate_on_submit():
         if "user" not in session:
-            return redirect(url_for('login',hide_header = request.args.get('hide_header',False,type=bool)))
+            return redirect(url_for('login',hide_header = request.args.get('hide_header',0,type=int)))
         with sqlconn() as sql:
             forum = Forum(
                 name=escape(form.name._value()),

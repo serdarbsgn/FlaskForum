@@ -6,6 +6,18 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
   </head>
   <body>
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    <ul class=flashes>
+      {% for message in messages %}
+      <li>{{ message }}</li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+    {% endwith %}
+    {% if not hide_header %}
+    {% include 'header.html' %}
+    {% endif %}
     <h1>User Registration</h1>
     <form method="POST" action="{{ url_for('register') }}">
       {{ form.csrf_token }}

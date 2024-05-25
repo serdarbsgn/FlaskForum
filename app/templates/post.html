@@ -18,7 +18,9 @@
   </ul>
   {% endif %}
   {% endwith %}
+  {% if not hide_header %}
   {% include 'header.html' %}
+  {% endif %}
   <h1>{{ contents.title|safe }}</h1>
   <p>{{ contents.content|safe }}</p>
   <p>Created at: {{ contents.created_at }}</p>

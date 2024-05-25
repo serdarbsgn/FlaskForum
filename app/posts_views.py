@@ -26,8 +26,8 @@ def post_page():
         created_by = sql.session.execute(Select.user_username({"id":contents["user_id"]})).mappings().fetchone()["username"]
         if "user" in session:
             user_info = get_user_info(sql)
-            return render_template('post.html',user=user_info["username"],picture = profile_photos_dir+user_info["picture"]["profile_picture"],contents = contents,created_by = created_by,comments=comments,comment_count=comment_count)
-        return render_template('post.html',contents = contents,created_by = created_by,comments=comments,comment_count=comment_count)
+            return render_template('post.html',user=user_info["username"],picture = profile_photos_dir+user_info["picture"]["profile_picture"],contents = contents,created_by = created_by,comments=comments,comment_count=comment_count,hide_header = request.args.get('hide_header',0,type=int))
+        return render_template('post.html',contents = contents,created_by = created_by,comments=comments,comment_count=comment_count,hide_header = request.args.get('hide_header',0,type=int))
 
 @app.route('/create/post',methods=['GET','POST'])
 def create_post():

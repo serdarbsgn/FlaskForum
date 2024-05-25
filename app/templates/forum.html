@@ -28,7 +28,7 @@
 <ul>
   {% for post in posts %}
     <li>
-      <a href= {{post.link}} > {{ post.title|safe }}</a>
+      <a href= {{post.link}}&hide_header={{hide_header}} > {{ post.title|safe }}</a>
       <p>Created at: {{ post.created_at }}</p>
     </li>
   {% endfor %}
