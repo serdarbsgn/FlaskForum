@@ -37,8 +37,8 @@
         const gameOverText = "Game Over, Your Score: "
         let colour = 255
         // Define player position
-        let playerX = canvas.width/2;
-        let playerY = canvas.height/2;
+        let playerX = parseInt((canvas.width/2)/10)*10;
+        let playerY = parseInt((canvas.height/2)/10)*10;
         let playerArr = []
         let direction = NaN;
         let acceptInput = true
@@ -139,8 +139,8 @@
                     }
                     else {
                     renderMenu();
-                    playerX = canvas.width/2;
-                    playerY = canvas.height/2;
+                    let playerX = parseInt((canvas.width/2)/10)*10;
+                    let playerY = parseInt((canvas.height/2)/10)*10;
                     playerArr = [];
                     direction = NaN;
                     speed = 10;
@@ -156,7 +156,6 @@
 
         // Function to render the game state
         function render() {
-            
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             ctx.fillStyle = 'gray';
             ctx.fillRect(0,0,canvas.width,canvas.height);
@@ -345,7 +344,6 @@
                             pauseBlocked--;
                         }
                     }
-                    console.log(j)
                 }
             }
             if(speedBoosted == false && keyboardBoosted == false){
