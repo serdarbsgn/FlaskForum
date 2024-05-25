@@ -22,7 +22,7 @@
   {% include 'header.html' %}
   {% endif %}
   <h1>User Login</h1>
-  <form method="POST" action="{{ url_for('login') }}">
+  <form method="POST" action="{{ url_for('login',hide_header=hide_header) }}">
     {{ form.csrf_token }}
     {{ form.username.label }} {{ form.username }}
     {% for error in form.username.errors %}
@@ -38,7 +38,7 @@
   </form>
   <li><a href="{{url_for('google_sign_in')}}">Login with Google</a></li>
   <li><a href="{{url_for('facebook_sign_in')}}">Login with Facebook</a></li>
-  <li><a href="{{url_for('register')}}">Register</a></li>
+  <li><a href="{{url_for('register',hide_header=hide_header)}}">Register</a></li>
   <li><a href="/">Home</a></li>
   {% include 'footer.html' %}
 </body>

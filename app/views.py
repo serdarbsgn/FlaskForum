@@ -61,6 +61,7 @@ def register():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    print(request.args.get('hide_header',0,type=int))
     form = LoginForm()
     if form.validate_on_submit():
         sql = sqlconn()

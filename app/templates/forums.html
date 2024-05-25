@@ -25,7 +25,7 @@
   <ul>
     {% for forum in forums %}
     <li>
-      <a href={{forum.link}}&hide_header={{hide_header}}> {{ forum.name|safe }}{{hide_header}}</a>
+      <a href={{forum.link}}&hide_header={{hide_header}}> {{ forum.name|safe }}</a>
       <p>{{ forum.description|safe }}</p>
       <p>Created at: {{ forum.created_at }}</p>
     </li>

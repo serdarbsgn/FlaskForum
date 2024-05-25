@@ -23,9 +23,69 @@
   {% endif %}
   <h1>Games</h1>
   <p>These are the games I wrote in Java, then ported to JavaScript to play on browser.</p>
-  <a href="{{url_for('snake_js')}}">Click Here to Play Snake</a>
-  <a href="{{url_for('minesweeper_js')}}">Click Here to Play MineSweeper</a>
-  <a href="{{url_for('physics')}}">Click Here to Play Physics thingy</a>
+  <a href="{{url_for('snake_js',hide_header=hide_header)}}" id="snake">Click Here to Play Snake</a>
+  <a href="{{url_for('minesweeper_js',hide_header=hide_header)}}" id="minesweeper">Click Here to Play MineSweeper</a>
+  <a href="{{url_for('physics',hide_header=hide_header)}}" id="physics">Click Here to Play Physics thingy</a>
+  <script>
+
+    let focusIndex = 0;
+    let redirected = 0;
+    const focusArray = ["snake", "minesweeper", "physics"];
+    function scanGamepad() {
+      if (gamepadConnected > 0) {
+        if(gamepadArrowDelay > 0){gamepadArrowDelay--;}
+        updateGamepadStatus();
+      }
+      requestAnimationFrame(scanGamepad)
+    }
+
+    let gamepadConnected = 0;
+    let gamepadArrowDelay = 15;
+    window.addEventListener("gamepadconnected", (event) => {
+      gamepadConnected += 1;
+    });
+
+    window.addEventListener("gamepaddisconnected", (event) => {
+      gamepadConnected -= 1;
+    });
+
+    function updateGamepadStatus() {
+      const currentGamepads = navigator.getGamepads();
+      let gp = currentGamepads[0];
+      if (gp) {
+        for (let j = 0; j < gp.buttons.length; j++) {
+          if (gp.buttons[j].pressed) {
+            if (j == 12 && gamepadArrowDelay <= 0) { // Up arrow on Xbox controller
+                focusIndex--;
+                focusIndex = Math.max(-1, focusIndex);
+                if (focusIndex < 0) {
+                  focusIndex = 2;
+                }
+                document.getElementById(focusArray[focusIndex]).focus();
+                gamepadArrowDelay = 15;
+          }else if (j == 13 && gamepadArrowDelay <= 0) { // Down arrow on Xbox controller
+              focusIndex++;
+              focusIndex = Math.min(3, focusIndex);
+              if (focusIndex > 2) {
+                focusIndex = 0;
+              }
+              document.getElementById(focusArray[focusIndex]).focus();
+              gamepadArrowDelay = 15;
+          }else if ((j == 2 || j == 1) && gamepadArrowDelay <= 0){
+            if(redirected==0)
+            {
+              window.location.href = document.getElementById(focusArray[focusIndex]).href;
+              redirected=1;
+            }
+            break;
+          }
+          
+        }
+      }
+    }
+  }
+    scanGamepad();
+  </script>
   {% include 'footer.html' %}
 </body>
 

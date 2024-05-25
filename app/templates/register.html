@@ -19,7 +19,7 @@
     {% include 'header.html' %}
     {% endif %}
     <h1>User Registration</h1>
-    <form method="POST" action="{{ url_for('register') }}">
+    <form method="POST" action="{{ url_for('register',hide_header=hide_header) }}">
       {{ form.csrf_token }}
       {{ form.username.label }} {{ form.username }}
       {% for error in form.username.errors %}
@@ -40,7 +40,7 @@
     </form>
     <li><a href="{{url_for('google_sign_in')}}">Register with Google</a></li>
     <li><a href="{{url_for('facebook_sign_in')}}">Register with Facebook</a></li>
-    <li><a href="{{url_for('login')}}">Login</a></li>
+    <li><a href="{{url_for('login',hide_header=hide_header)}}">Login</a></li>
     <li><a href="/">Home</a></li>
     {% include 'footer.html' %}
   </body>

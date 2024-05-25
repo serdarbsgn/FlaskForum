@@ -31,13 +31,13 @@
           <h2>{{ product.name }}</h2>
           <p>{{ product.description }}</p>
           <p>Price: {{ product.price }}</p>
-          <form action="/add-to-cart" method="post">
+          <form action="{{ url_for('add_to_cart',hide_header=hide_header) }}" method="post">
             {{ form.csrf_token }}
             {{ form.product_id(value=product.id) }}
             <input type="submit" value="Add to Cart">
           </form>
           <br>
-          <a href="{{ url_for('forum_page', id=product.forum_id) }}">Go to Product's Forum</a>
+          <a href="{{ url_for('forum_page', id=product.forum_id,hide_header=hide_header) }}">Go to Product's Forum</a>
           <br>
       </div>
       {% endfor %}

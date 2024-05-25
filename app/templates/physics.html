@@ -21,8 +21,8 @@
     <script>
         // Get a reference to the canvas element
         const canvas = document.getElementById('gameCanvas');
-        canvas.width = window.innerWidth*2/3
-        canvas.height = window.innerHeight*2/3
+        canvas.width = window.innerWidth
+        canvas.height = window.innerHeight
         const ctx = canvas.getContext('2d');
         let mouseCoordinates = [0,0]
         let heldRectLastCoords = [0,0]
@@ -380,6 +380,8 @@
     gameLoop();
 
     </script>
+    {% if not hide_header %}
     {% include 'footer.html' %}
+    {% endif %}
 </body>
 </html>

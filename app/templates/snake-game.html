@@ -21,6 +21,8 @@
     <script>
         // Get a reference to the canvas element
         const canvas = document.getElementById('gameCanvas');
+        canvas.width = parseInt(window.innerWidth/10)*10;
+        canvas.height = parseInt(window.innerHeight/10)*10;
         const ctx = canvas.getContext('2d');
         const Direction = {
             UP: 'UP',
@@ -381,6 +383,9 @@
 
 
     </script>
+    {% if not hide_header %}
     {% include 'footer.html' %}
+    {% endif %}
+    
 </body>
 </html>

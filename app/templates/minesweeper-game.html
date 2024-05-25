@@ -335,6 +335,8 @@
 
         canvas.addEventListener('mousemove', mouseMoved);
     </script>
+    {% if not hide_header %}
     {% include 'footer.html' %}
+    {% endif %}
 </body>
 </html>
