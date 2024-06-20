@@ -12,6 +12,10 @@ from PIL import Image
 from . import app
 from app.helpers import *
 
+@app.route('/sidescroller',methods = ['GET'])
+def side_scroller():
+    return render_template('side-scroller.html',hide_header = request.args.get('hide_header',0,type=int))
+
 @app.route('/canvas-home',methods = ['GET'])
 def canvas_home():
     if "user" in session:
