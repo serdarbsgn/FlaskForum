@@ -12,6 +12,10 @@ from PIL import Image
 from . import app
 from app.helpers import *
 
+@app.route('/privacy-policy-for-gyrowheel-app',methods=['GET'])
+def gyrowheel_privacy_policy():
+    return render_template('privacy-policy-for-gyrowheel-app.html')
+
 @app.route('/sidescroller',methods = ['GET'])
 def side_scroller():
     return render_template('side-scroller.html',hide_header = request.args.get('hide_header',0,type=int))
