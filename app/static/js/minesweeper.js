@@ -9,24 +9,31 @@ const controlsText = "Middle Mouse Button Resets Game"
 const flagText = "Right Click on a Tile to Flag it"
 const flagText2 = "to Prevent Accidental Presses"
 const gameOverText = "Game Over"
+const youWinText = "You cleared all mines, congrats!"
 let gameOver = false;
 let mouseCoordinates = [0,0]
 let mineField = new Array()
 let cols = 28;
 let rows = 16;
+
 for (let i = 0; i < cols; i++ ){
     mineField[i] = new Array(rows).fill(0)
 }
-let mineCount = 75;
-let mineCountCopy = 75;
+let mineCount = 50;
+let mineCountCopy = 50;
 let firstClick = true;
+let uncoveredSafeTiles = 0;
 // Main game loop
 function gameLoop() {
     if(gameOver)
     {
         uncoverAllBombs();
         render();
-        renderGameOver();
+        if(uncoveredSafeTiles == 0){
+            renderVictory();
+        }else{
+            renderGameOver();
+        }
     }
     else
     {
@@ -119,72 +126,37 @@ function renderGameOver(){
     ctx.fillStyle = 'black';
     ctx.fillText(`${gameOverText}`,(canvas.width-ctx.measureText(`${gameOverText}`).width)/2,canvas.height/2)
 }
-
+function renderVictory() {
+    ctx.font = '20px Arial';
+    ctx.fillStyle = 'black';
+    ctx.fillText(`${youWinText}`, (canvas.width - ctx.measureText(`${youWinText}`).width) / 2, canvas.height / 2);
+}
 gameLoop();
 
 function initializeMinefield(x,y){
     for(let i = 1; i < cols-1;i++){
         for(let j = 1; j < rows-1;j++){
             if (i == x && j == y) {
-            mineField[x][y] = 10;
-
-            if (mineField[x - 1][y] == 9) {
-                mineCount++;
-            }
-            mineField[x - 1][y] = 10;
-
-            if (mineField[x - 1][y - 1] == 9) {
-                mineCount++;
-            }
-            mineField[x - 1][y - 1] = 10;
-
-            if (mineField[x][y - 1] == 9) {
-                mineCount++;
-            }
-            mineField[x][y - 1] = 10;
-
-            if (mineField[x][y + 1] == 9) {
-                mineCount++;
-            }
-            mineField[x][y + 1] = 10;
-
-            if (mineField[x - 1][y + 1] == 9) {
-                mineCount++;
-            }
-            mineField[x - 1][y + 1] = 10;
-
-            if (mineField[x + 1][y] == 9) {
-                mineCount++;
-            }
-            mineField[x + 1][y] = 10;
-
-            if (mineField[x + 1][y - 1] == 9) {
-                mineCount++;
-            }
-            mineField[x + 1][y - 1] = 10;
-
-            if (mineField[x + 1][y + 1] == 9) {
-                mineCount++;
-            }
-            mineField[x + 1][y + 1] = 10;
-
-        } else if ((i == x && j == y + 1) || (i == x + 1 && (j == y - 1 || j == y || j == y + 1))) {
-            continue;
+                mineField[i][j] = 10;
+                uncoveredSafeTiles+=1;
         } else {
             if (mineCount != 0) {
-                let temp = parseInt((Math.random() * 4));
+                let temp = parseInt((Math.random() * 6));
                 if (temp == 3) {
                     mineField[i][j] = 9;
                     mineCount--;
                 } else {
                     mineField[i][j] = 10;
+                    uncoveredSafeTiles+=1;
                 }
             } else {
                 mineField[i][j] = 10;
+                uncoveredSafeTiles+=1;
             }
         }
-    }
+    }   
 }
+console.log(mineCount);
 for (let i = 0; i < cols; i++) {
     if (i < rows) {
         mineField[0][i] = 0;
@@ -194,11 +166,10 @@ for (let i = 0; i < cols; i++) {
     mineField[i][15] = 0;
 }
 arrangeNumbers(x, y);
-
 }
 
 function arrangeNumbers(x,y){
-    if (mineField[x][y] == 0 || mineField[x][y] > 50) {
+    if (mineField[x][y] == 0 || mineField[x][y] > 50 || mineField[x][y]<9) {
     return;
 }
 let bombCount = -1;
@@ -206,7 +177,7 @@ if (mineField[x][y] == 9) {
     gameOver = true;
 } else {
     bombCount = 0;
-
+    uncoveredSafeTiles-=1;
     if (mineField[x - 1][y] == 9 || mineField[x - 1][y] == 108) {
         bombCount++;
     }
@@ -239,6 +210,9 @@ if (mineField[x][y] == 9) {
         bombCount++;
     }
 }
+if(uncoveredSafeTiles==0){
+    gameOver=true;
+}
 if (bombCount == 0) {
     mineField[x][y] = 0;
     arrangeNumbers(x - 1, y);
@@ -250,7 +224,8 @@ if (bombCount == 0) {
     arrangeNumbers(x + 1, y - 1);
     arrangeNumbers(x + 1, y + 1);
 
-} else mineField[x][y] = bombCount;
+} else{
+    mineField[x][y] = bombCount;}
 }
 
 function flagSquare(x,y) {
@@ -278,8 +253,9 @@ function mouseClicked(e) {
     if(gameOver){
         gameOver = false
         firstClick = true
-        mineCount = 75;
-        mineCountCopy = 75;
+        mineCount = 50;
+        mineCountCopy = 50;
+        uncoveredSafeTiles = 0;
     }
     if (e.button === 0) {
         if ( normalisedCoordinates[0] === 0 || normalisedCoordinates[0] === (cols-1) || normalisedCoordinates[1] === 0 || normalisedCoordinates[1] === (rows-1))
