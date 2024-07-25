@@ -1,9 +1,7 @@
 
 //make sure to have a <canvas id="gameCanvas" width="800" height="800"></canvas> canvas object like this before importing it.
-//still it doesn't have a win screen, do it.
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
-
 const playPauseText = "Left Click on a Tile to Start"
 const controlsText = "Middle Mouse Button Resets Game"
 const flagText = "Right Click on a Tile to Flag it"
@@ -15,23 +13,29 @@ let mouseCoordinates = [0,0]
 let mineField = new Array()
 let cols = 28;
 let rows = 16;
+if(canvas.width<canvas.height){
+    cols = 16;
+    rows = 28;
+}
+
 
 for (let i = 0; i < cols; i++ ){
     mineField[i] = new Array(rows).fill(0)
 }
-let mineCount = 50;
-let mineCountCopy = 50;
+let mineCount = 57;
+let mineCountCopy = 57;
 let firstClick = true;
 let uncoveredSafeTiles = 0;
 // Main game loop
 function gameLoop() {
     if(gameOver)
     {
-        uncoverAllBombs();
-        render();
         if(uncoveredSafeTiles == 0){
+            render();
             renderVictory();
         }else{
+            uncoverAllBombs();
+            render();
             renderGameOver();
         }
     }
@@ -54,14 +58,14 @@ function render() {
     ctx.fillStyle = 'green';
     ctx.font = 'bold 12px Arial';
     ctx.fillText(`🚩: ${mineCountCopy-mineCount}`,(canvas.width-ctx.measureText(`🚩: ${mineCountCopy-mineCount}`).width)/2,13)
-    for (let i = 0; i <= 26; i++) {
+    for (let i = 0; i <= cols-2; i++) {
         ctx.beginPath();
         ctx.moveTo(20+((canvas.width-40) * i / (cols-2)), ((canvas.height-40) / (rows-2))-5);
         ctx.lineTo(20+((canvas.width-40) * i / (cols-2)), canvas.height - 20);
         ctx.stroke();
     }
 
-    for (let j = 0; j <= 14; j++) {
+    for (let j = 0; j <= rows-2; j++) {
         ctx.beginPath();
         ctx.moveTo(((canvas.width-40) / (cols-2))-5, 20+((canvas.height-40)*j/(rows-2)));
         ctx.lineTo(canvas.width - 20, 20+((canvas.height-40)*j/(rows-2)));
@@ -136,7 +140,7 @@ gameLoop();
 function initializeMinefield(x,y){
     for(let i = 1; i < cols-1;i++){
         for(let j = 1; j < rows-1;j++){
-            if (i == x && j == y) {
+            if ((i == x && j == y || j==y-1||j==y+1)||(i == x-1 && j == y || j==y-1||j==y+1)||(i == x+1 && j == y || j==y-1||j==y+1)){
                 mineField[i][j] = 10;
                 uncoveredSafeTiles+=1;
         } else {
@@ -156,14 +160,13 @@ function initializeMinefield(x,y){
         }
     }   
 }
-console.log(mineCount);
 for (let i = 0; i < cols; i++) {
     if (i < rows) {
         mineField[0][i] = 0;
-        mineField[27][i] = 0;
+        mineField[cols-1][i] = 0;
     }
     mineField[i][0] = 0;
-    mineField[i][15] = 0;
+    mineField[i][rows-1] = 0;
 }
 arrangeNumbers(x, y);
 }
@@ -229,6 +232,7 @@ if (bombCount == 0) {
 }
 
 function flagSquare(x,y) {
+    if (mineField[x][y]<9){return}
     if (mineField[x][y] < 50) {
         if (mineCountCopy > 0){
             mineField[x][y] += 99;
@@ -253,8 +257,8 @@ function mouseClicked(e) {
     if(gameOver){
         gameOver = false
         firstClick = true
-        mineCount = 50;
-        mineCountCopy = 50;
+        mineCount = 57;
+        mineCountCopy = 57;
         uncoveredSafeTiles = 0;
     }
     if (e.button === 0) {

@@ -339,19 +339,21 @@ for (let j = 0; j < gp.buttons.length; j++) {
     if(buttonPressed == false){
         gamepadHeldRectIndex = -1
     }
-    for (let k = 0; k < gp.axes.length; k++) {
-        if (Math.abs(gp.axes[k]) > 0.1) { // Simple dead zone check
-            if(gamepadHeldRectIndex!=-1){
-                if(k == 1){//if axis is 1,which is left analog's y axis
-                    cubes[gamepadHeldRectIndex][1] += gp.axes[k]*5;
-                    cubes[gamepadHeldRectIndex][3] = gp.axes[k]*5;
+    if(gp.axes.length > 0){
+        for (let k = 0; k < gp.axes.length; k++) {
+            if (Math.abs(gp.axes[k]) > 0.1) { // Simple dead zone check
+                if(gamepadHeldRectIndex!=-1){
+                    if(k == 1){//if axis is 1,which is left analog's y axis
+                        cubes[gamepadHeldRectIndex][1] += gp.axes[k]*5;
+                        cubes[gamepadHeldRectIndex][3] = gp.axes[k]*5;
+                    }
+                    if(k == 0){//if axis is 0,which is left analog's x axis
+                        cubes[gamepadHeldRectIndex][0] += gp.axes[k]*5;
+                        cubes[gamepadHeldRectIndex][2] = gp.axes[k]*5;
+                    }
                 }
-                if(k == 0){//if axis is 0,which is left analog's x axis
-                    cubes[gamepadHeldRectIndex][0] += gp.axes[k]*5;
-                    cubes[gamepadHeldRectIndex][2] = gp.axes[k]*5;
-                }
+                
             }
-            
         }
     }
 }

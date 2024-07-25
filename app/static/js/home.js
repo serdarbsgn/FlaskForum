@@ -572,16 +572,18 @@ if (gp) {
         gamepadHeldRectIndex = -1;
     }  
 }
-for (let k = 0; k < gp.axes.length; k++) {
-        if (Math.abs(gp.axes[k]) > 0.1) { // Simple dead zone check
-            if (gamepadHeldRectIndex != -1) {
-                if (k == 1) { // Left analog's y axis
-                    rectangles[gamepadHeldRectIndex].y += gp.axes[k] * 5;
-                    rectangles[gamepadHeldRectIndex].vy = gp.axes[k] * 5;
-                }
-                if (k == 0) { // Left analog's x axis
-                    rectangles[gamepadHeldRectIndex].x += gp.axes[k] * 5;
-                    rectangles[gamepadHeldRectIndex].vx = gp.axes[k] * 5;
+if(gp.axes.length > 0){
+    for (let k = 0; k < gp.axes.length; k++) {
+            if (Math.abs(gp.axes[k]) > 0.1) { // Simple dead zone check
+                if (gamepadHeldRectIndex != -1) {
+                    if (k == 1) { // Left analog's y axis
+                        rectangles[gamepadHeldRectIndex].y += gp.axes[k] * 5;
+                        rectangles[gamepadHeldRectIndex].vy = gp.axes[k] * 5;
+                    }
+                    if (k == 0) { // Left analog's x axis
+                        rectangles[gamepadHeldRectIndex].x += gp.axes[k] * 5;
+                        rectangles[gamepadHeldRectIndex].vx = gp.axes[k] * 5;
+                    }
                 }
             }
         }

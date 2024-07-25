@@ -16,7 +16,17 @@
     {% if not hide_header %}
     {% include 'header.html' %}
     {% endif %}
-    <canvas id="gameCanvas" width="690" height="390" oncontextmenu="return false;"></canvas>
+    <canvas id="gameCanvas" oncontextmenu="return false;"></canvas>
+    <script>
+            const canvasSet = document.getElementById('gameCanvas');
+            if (window.innerWidth > window.innerHeight) {
+                canvasSet.width = 690;
+                canvasSet.height = 390;
+            } else {
+                canvasSet.width = 390;
+                canvasSet.height = 690;
+            }
+    </script>
     <script src="{{ url_for('static', filename='js/minesweeper.js') }}"></script>
     {% if not hide_header %}
     {% include 'footer.html' %}

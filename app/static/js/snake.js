@@ -117,8 +117,8 @@ if (deltaTime > frameDelay) {
         }
         else {
         renderMenu();
-        let playerX = parseInt((canvas.width/2)/10)*10;
-        let playerY = parseInt((canvas.height/2)/10)*10;
+        playerX = parseInt((canvas.width/2)/10)*10;
+        playerY = parseInt((canvas.height/2)/10)*10;
         playerArr = [];
         direction = NaN;
         speed = 10;
@@ -327,32 +327,34 @@ for (let j = 0; j < gp.buttons.length; j++) {
 if(speedBoosted == false && keyboardBoosted == false){
     speed = 10
 }
-for (let k = 0; k < gp.axes.length; k++) {
-    if (Math.abs(gp.axes[k]) > 0.4) { // Simple dead zone check
-        if(k == 1 && direction!= Direction.DOWN && direction!=Direction.UP && acceptInput){//this corresponds to up left analog stick y axis on Xbox controller
-            if(gp.axes[k] > 0){
-                direction = Direction.DOWN;
+if(gp.axes.length > 0){
+    for (let k = 0; k < gp.axes.length; k++) {
+        if (Math.abs(gp.axes[k]) > 0.4) { // Simple dead zone check
+            if(k == 1 && direction!= Direction.DOWN && direction!=Direction.UP && acceptInput){//this corresponds to up left analog stick y axis on Xbox controller
+                if(gp.axes[k] > 0){
+                    direction = Direction.DOWN;
+                }
+                else{
+                    direction = Direction.UP;
+                }
+                const normArr = [playerX,playerY]
+                playerX = normArr[0]
+                playerY = normArr[1]
+                acceptInput = false
             }
-            else{
-                direction = Direction.UP;
-            }
-            const normArr = [playerX,playerY]
-            playerX = normArr[0]
-            playerY = normArr[1]
-            acceptInput = false
+            else if(k == 0 && direction!= Direction.LEFT && direction!=Direction.RIGHT && acceptInput){//this corresponds to left analog stick x axis on Xbox controller
+                if(gp.axes[k] > 0){
+                    direction = Direction.RIGHT;
+                }
+                else{
+                    direction = Direction.LEFT;
+                }
+                const normArr = [playerX,playerY]
+                playerX = normArr[0]
+                playerY = normArr[1]
+                acceptInput = false
+            }                    
         }
-        else if(k == 0 && direction!= Direction.LEFT && direction!=Direction.RIGHT && acceptInput){//this corresponds to left analog stick x axis on Xbox controller
-            if(gp.axes[k] > 0){
-                direction = Direction.RIGHT;
-            }
-            else{
-                direction = Direction.LEFT;
-            }
-            const normArr = [playerX,playerY]
-            playerX = normArr[0]
-            playerY = normArr[1]
-            acceptInput = false
-        }                    
     }
 }
 }
