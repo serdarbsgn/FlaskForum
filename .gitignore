@@ -1,5 +1,6 @@
 .env
 .venv
+/fastapi
 /app/sql_dependant/__pycache__
 /app/__pycache__
 /app/static/photos/users/*
