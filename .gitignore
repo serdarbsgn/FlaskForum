@@ -1,0 +1,8 @@
+.env
+.venv
+/app/sql_dependant/__pycache__
+/app/__pycache__
+/app/static/photos/users/*
+/app/static/photos/products/*
+/app/static/photos/posts/*
+!/app/static/photos/users/pp.jpg
