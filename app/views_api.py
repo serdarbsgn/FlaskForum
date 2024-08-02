@@ -38,10 +38,7 @@ class MsgResponse(BaseModel):
         }
         })
 async def api_get_user_info(request: Request):
-    auth_check = check_auth(request)
-    if not auth_check:
-        raise HTTPException(status_code=401, detail="Can't get the user because token is expired or wrong.")
-    
+    auth_check = check_auth(request)   
     with sqlconn() as sql:
         user = sql.session.execute(Select.user_username({"id":auth_check["user"]})).mappings().fetchone()
         picture = sql.session.execute(Select.user_profile_picture({"user":user["username"]})).mappings().fetchone()
@@ -103,7 +100,7 @@ async def validate_login_token(login_info: LoginInfo) -> Dict[str, Any]:
         401: {
             "description": "Supplied credentials are wrong.",
             "model": ErrorResponse
-        },
+        }
         })
 async def api_login_post(login_info: LoginInfo, token_validity: Dict[str, Any] = Depends(validate_login_token)):
         login_info = (token_validity["username"],token_validity["password"])
@@ -207,8 +204,6 @@ class UsernameInfo(BaseModel):
         })
 async def api_change_username(request:Request,username_info:UsernameInfo):
     auth_check = check_auth(request)
-    if not auth_check:
-        raise HTTPException(status_code=401, detail="Can't get the user because token is expired or wrong.")
     with sqlconn() as sql:
         check = sql.session.execute(Select.user_unique_username({"username":escape(request.json["username"])})).mappings().fetchall()
         if len(check)>0:
@@ -225,8 +220,6 @@ class PasswordChangeInfo(BaseModel):
 @app.post('/api/change-password')
 async def api_change_password(request:Request,password_info:PasswordChangeInfo):
     auth_check = check_auth(request)
-    if not auth_check:
-        raise HTTPException(status_code=401, detail="Can't get the user because token is expired or wrong.")
     with sqlconn() as sql:
         check = sql.session.execute(Select.user_exists_id_password({"user_id":auth_check["user"],
         "password":generate_hash(escape(password_info.current_password))})).mappings().fetchall()
@@ -242,8 +235,6 @@ class PasswordSetInfo(BaseModel):
 @app.post('/api/set-password')
 async def api_set_password(request:Request,password_info:PasswordSetInfo):
     auth_check = check_auth(request)
-    if not auth_check:
-        raise HTTPException(status_code=401, detail="Can't get the user because token is expired or wrong.")
     with sqlconn() as sql:
         check = sql.session.execute(Select.user_exists_id_none_password({"user_id":auth_check["user"]})).mappings().fetchall()
         if len(check)==0:
@@ -269,8 +260,6 @@ async def api_set_password(request:Request,password_info:PasswordSetInfo):
         })
 async def api_remove_account(request:Request,username_info:UsernameInfo):
     auth_check = check_auth(request)
-    if not auth_check:
-        raise HTTPException(status_code=401, detail="Can't get the user because token is expired or wrong.")
     with sqlconn() as sql:
         get_user = sql.session.execute(Select.user_username({"id":auth_check["user"]})).mappings().fetchone()
         username = get_user["username"]
@@ -307,8 +296,6 @@ class UserStatsResponse(BaseModel):
         }})
 async def api_userstats(request:Request):
     auth_check = check_auth(request)
-    if not auth_check:
-        raise HTTPException(status_code=401, detail="Can't get the user because token is expired or wrong.")
     with sqlconn() as sql:
         user_scores = {
             "comment_count":sql.session.execute(Select.user_comment_count({"user_id":auth_check["user"]})).mappings().fetchone()["count"],
@@ -335,9 +322,6 @@ async def api_userstats(request:Request):
         })
 async def api_add_profile_picture(request:Request,file: UploadFile = File(...)):
     auth_check = check_auth(request)
-    if not auth_check:
-        raise HTTPException(status_code=401, detail="Can't get the user because token is expired or wrong.")
-    
     rand = "pp-" + str(uuid.uuid4()) + ".jpg"
     filepath = os.path.join(project_dir, "static", profile_photos_dir, rand)
     with open(filepath, "wb") as buffer:
@@ -369,8 +353,6 @@ async def api_add_profile_picture(request:Request,file: UploadFile = File(...)):
         })
 async def api_remove_profile_picture(request:Request):
     auth_check = check_auth(request)
-    if not auth_check:
-        raise HTTPException(status_code=401, detail="Can't get the user because token is expired or wrong.")
     with sqlconn() as sql:
         user = sql.session.execute(Select.user_username({"id":auth_check["user"]})).mappings().fetchone()
         picture = sql.session.execute(Select.user_profile_picture({"user":user["username"]})).mappings().fetchone()
@@ -383,3 +365,5 @@ async def api_remove_profile_picture(request:Request):
         except Exception as e:
             logging.warn(e)
         return MsgResponse(msg="Removed profile picture successfully.")
+    
+import comments_views_api,forums_views_api,posts_views_api

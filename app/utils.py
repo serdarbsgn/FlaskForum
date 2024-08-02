@@ -1,4 +1,5 @@
 from datetime import datetime
+from fastapi import HTTPException
 import jwt
 from sql_dependant.env_init import JWT_SECRET_KEY,PASSWORD_SALT
 from hashlib import pbkdf2_hmac
@@ -26,12 +27,12 @@ def generate_hash(plain_password, password_salt=PASSWORD_SALT):
 
 def check_auth(request):
     if not "Authorization" in request.headers:
-        return False
+        raise HTTPException(status_code=401, detail="Can't get the user because token is expired or wrong.")
     test = decode_jwt_token(request.headers['Authorization'])
     if test:
         if not set(["expire_at", "user"]).issubset(set(test.keys())):
-            return False
+            raise HTTPException(status_code=401, detail="Can't get the user because token is expired or wrong.")
         if datetime.now() < datetime.strptime(test["expire_at"],"%Y-%m-%d %H:%M:%S.%f"):
             return test
-    return False
+    raise HTTPException(status_code=401, detail="Can't get the user because token is expired or wrong.")
 
