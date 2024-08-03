@@ -34,7 +34,7 @@ class ForumPageResponse(BaseModel):
     postcount:int
     
 @app.post('/api/forum')
-def api_forum_page(forum_info:ForumInfo):
+async def api_forum_page(forum_info:ForumInfo):
     id = forum_info.id
     pagenumber = forum_info.page
     with sqlconn() as sql:
@@ -56,17 +56,17 @@ class ForumsInfo(BaseModel):
 
 class ForumResponse(BaseModel):
     id : int
-    title: str
+    name: str
+    description:str
     link:str
     created_at:datetime
-    updated_at:datetime
 
 class ForumsPageResponse(BaseModel):
     forums: List[ForumResponse]
     page_count:int
 
-@app.route('/api/forums', methods=['POST'])
-def api_forums_page(forums_info:ForumsInfo):
+@app.post('/api/forums')
+async def api_forums_page(forums_info:ForumsInfo):
     pagenumber = forums_info.page
     with sqlconn() as sql:
         forums = listify(sql.session.execute(Select.forums(pagenumber)).mappings().fetchall())
@@ -74,15 +74,15 @@ def api_forums_page(forums_info:ForumsInfo):
             forum["link"] = "forum?id="+str(forum["id"])
         forumcount = sql.session.execute(Select.forums_count()).mappings().fetchone()
         forumcount = (forumcount["count"]-1)//5
-        return ForumsPageResponse([ForumResponse(**forum) for forum in forums],page_count=forumcount)
-
+        return ForumsPageResponse(forums=[ForumResponse(**forum) for forum in forums],page_count=forumcount)
+    
 class ForumCreateInfo(BaseModel):
     name : str = Field(min_length=4)
     description : str = Field(min_length=4)
 
 
-@app.route('/api/create/forum',methods=['POST'])
-def api_create_forum(request:Request,forum_create_info:ForumCreateInfo):
+@app.post('/api/create/forum')
+async def api_create_forum(request:Request,forum_create_info:ForumCreateInfo):
     check_auth(request)
     name=escape(forum_create_info.name)
     with sqlconn() as sql:
@@ -94,4 +94,4 @@ def api_create_forum(request:Request,forum_create_info:ForumCreateInfo):
             raise HTTPException(status_code=400, detail="Forum with this name already exists")
         sql.session.add(forum)
         sql.session.commit()
-        return MsgResponse(msg="Deleted comment")
+        return MsgResponse(msg="Forum created.")

@@ -42,7 +42,7 @@ class PostPageResponse(BaseModel):
     comment_count:int
 
 @app.post('/api/post')
-def api_post_page(post_info:PostInfo):
+async def api_post_page(post_info:PostInfo):
     id = post_info.id
     pagenumber = post_info.page
     with sqlconn() as sql:
@@ -63,7 +63,7 @@ class CreatePostInfo(BaseModel):
     content : str = Field(min_length=4)
 
 @app.post('/api/create/post')
-def api_create_post(request:Request,create_post_info:CreatePostInfo):
+async def api_create_post(request:Request,create_post_info:CreatePostInfo):
     auth_check = check_auth(request)
     forum_id = create_post_info.forum_id
     title=escape(create_post_info.title)
@@ -84,7 +84,7 @@ class UpdatePostInfo(BaseModel):
     content : str = Field(min_length=4)
 
 @app.post('/api/update/post')
-def api_update_post(request:Request,update_post_info:UpdatePostInfo):
+async def api_update_post(request:Request,update_post_info:UpdatePostInfo):
     auth_check = check_auth(request)
     post_id = update_post_info.post_id
     title=escape(update_post_info.title)
@@ -99,7 +99,7 @@ class DLDPostInfo(BaseModel):
     post_id : int
 
 @app.post('/api/delete/post')
-def api_delete_post(request:Request,delete_post_info:DLDPostInfo):
+async def api_delete_post(request:Request,delete_post_info:DLDPostInfo):
     auth_check = check_auth(request)
     post_id = delete_post_info.post_id
     with sqlconn() as sql:
@@ -113,7 +113,7 @@ def api_delete_post(request:Request,delete_post_info:DLDPostInfo):
         return MsgResponse(msg="Deleted post")
 
 @app.post('/api/post/like')
-def api_like_post(request:Request,like_post_info:DLDPostInfo):
+async def api_like_post(request:Request,like_post_info:DLDPostInfo):
     auth_check = check_auth(request)
     post_id = like_post_info.post_id
 
@@ -140,7 +140,7 @@ def api_like_post(request:Request,like_post_info:DLDPostInfo):
         return MsgResponse(msg="Liked")
 
 @app.post('/api/post/dislike')
-def api_dislike_post(request:Request,dislike_post_info:DLDPostInfo):
+async def api_dislike_post(request:Request,dislike_post_info:DLDPostInfo):
     auth_check = check_auth(request)
     post_id = dislike_post_info.post_id
 

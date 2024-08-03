@@ -17,7 +17,7 @@ class CreateCommentInfo(BaseModel):
     content: str = Field(min_length=4)
 
 @app.post('/api/create/comment')
-def api_create_comment(request:Request,create_comment_info:CreateCommentInfo):
+async def api_create_comment(request:Request,create_comment_info:CreateCommentInfo):
     auth_check = check_auth(request)
     post_id = create_comment_info.post_id
     comment_id = create_comment_info.parent_id
@@ -36,7 +36,7 @@ class CommentInfo(BaseModel):
     comment_id: int
 
 @app.post('/api/delete/comment')
-def api_delete_comment(request:Request,delete_comment_info:CommentInfo):
+async def api_delete_comment(request:Request,delete_comment_info:CommentInfo):
     auth_check = check_auth(request)
     comment_id = delete_comment_info.comment_id
 
@@ -69,7 +69,7 @@ class RepliesResponse(BaseModel):
     replies : List[ReplyResponse]
 
 @app.post('/api/fetch/replies')
-def api_fetch_replies(replies_info:RepliesInfo):
+async def api_fetch_replies(replies_info:RepliesInfo):
     with sqlconn() as sql:
         replies = listify(sql.session.execute(Select.replies_of_comment({"post_id":replies_info.post_id,"parent_id":replies_info.parent_id})).mappings().fetchall())
         return RepliesResponse(replies = [ReplyResponse(**reply) for reply in replies])
@@ -104,7 +104,7 @@ def api_like_comment(request:Request,like_comment_info:CommentInfo):
         return MsgResponse(msg="Liked")
 
 @app.post('/api/comment/dislike')
-def api_dislike_comment(request:Request,dislike_comment_info:CommentInfo):
+async def api_dislike_comment(request:Request,dislike_comment_info:CommentInfo):
     auth_check = check_auth(request)
     user_id = auth_check["user"]
     comment_id = dislike_comment_info.comment_id
