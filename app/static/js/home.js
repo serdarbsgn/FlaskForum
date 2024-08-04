@@ -522,13 +522,14 @@ gamepadConnected -= 1;
 
 function updateGamepadStatus() {
 const currentGamepads = navigator.getGamepads();
-let gp = currentGamepads[0];
+let gp = null;
+for (let j = 0; j < currentGamepads.length; j++){
+    if(currentGamepads[j] !== null){gp=currentGamepads[j]}
+}
 let buttonPressed = false;
-
 if (gp) {
     for (let j = 0; j < gp.buttons.length; j++) {
         if (gp.buttons[j].pressed) {
-            console.log(j)
             if (j == 14) { // Left arrow on Xbox controller
                 if (gamepadArrowDelay <= 0) {
                     highlightRectPad = Math.max(-1, highlightRectPad - 1);

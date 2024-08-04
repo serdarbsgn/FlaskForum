@@ -300,7 +300,10 @@ window.addEventListener("gamepaddisconnected", (event) => {
 
 function updateGamepadStatus(){
 const currentGamepads = navigator.getGamepads();
-let gp = currentGamepads[0]
+let gp = null;
+for (let j = 0; j < currentGamepads.length; j++){
+    if(currentGamepads[j] !== null){gp=currentGamepads[j]}
+}
 let buttonPressed = false;
 for (let j = 0; j < gp.buttons.length; j++) {
         if (gp.buttons[j].pressed) {
