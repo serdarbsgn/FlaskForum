@@ -248,4 +248,4 @@ def api_remove_profile_picture():
         return jsonify({"msg":"Removed profile picture successfully."}),200
 
 
-from app import comments_views_api,forums_views_api,posts_views_api
+from app import comments_views_api,forums_views_api,posts_views_api,views_market_api

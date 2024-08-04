@@ -1,3 +1,4 @@
+from decimal import Decimal
 import uuid
 from flask import request,jsonify,escape
 from app.sql_dependant.sql_read import Select
@@ -16,7 +17,7 @@ def api_orders():
         return jsonify({"msg":"Can't get the user because token is expired or wrong."}),401
 
     with sqlconn() as sql:
-        order_items = sql.session.execute(Select.order_item({"user":auth_check["user"]})).mappings().fetchall()
+        order_items = listify(sql.session.execute(Select.order_item({"user":auth_check["user"]})).mappings().fetchall())
         order_dict = {}
         for order in order_items:
             if order["order_id"] not in order_dict:
@@ -30,7 +31,7 @@ def api_cart():
     if not auth_check:
         return jsonify({"msg":"Can't get the user because token is expired or wrong."}),401
     with sqlconn() as sql:
-        cart_items = sql.session.execute(Select.cart_item({"user":auth_check["user"]})).mappings().fetchall()
+        cart_items = listify(sql.session.execute(Select.cart_item({"user":auth_check["user"]})).mappings().fetchall())
         total = 0
         for item in cart_items:
             total += item["quantity"]*item["price"]
@@ -131,7 +132,7 @@ def api_add_product():
         product = Product(
             name = escape(request.form["name"]),
             description = escape(request.form["description"]),
-            price = int(escape(request.form["price"])),
+            price = Decimal(escape(request.form["price"])),
             image = rand
         )
         sql.session.add(product)
