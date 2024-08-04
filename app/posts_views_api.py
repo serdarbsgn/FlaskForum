@@ -41,7 +41,11 @@ class PostPageResponse(BaseModel):
     created_by:str
     comment_count:int
 
-@app.post('/api/post')
+@app.post('/api/post',responses={
+        200: {
+            "description": "Success response",
+            "model": PostPageResponse
+        }})
 async def api_post_page(post_info:PostInfo):
     id = post_info.id
     pagenumber = post_info.page

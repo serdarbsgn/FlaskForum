@@ -68,7 +68,11 @@ class ReplyResponse(BaseModel):
 class RepliesResponse(BaseModel):
     replies : List[ReplyResponse]
 
-@app.post('/api/fetch/replies')
+@app.post('/api/fetch/replies',responses={
+        200: {
+            "description": "Success response",
+            "model": RepliesResponse
+        }})
 async def api_fetch_replies(replies_info:RepliesInfo):
     with sqlconn() as sql:
         replies = listify(sql.session.execute(Select.replies_of_comment({"post_id":replies_info.post_id,"parent_id":replies_info.parent_id})).mappings().fetchall())

@@ -33,7 +33,11 @@ class ForumPageResponse(BaseModel):
     posts: List[ForumPostsResponse]
     postcount:int
     
-@app.post('/api/forum')
+@app.post('/api/forum',responses={
+        200: {
+            "description": "Success response",
+            "model": ForumPageResponse
+        }})
 async def api_forum_page(forum_info:ForumInfo):
     id = forum_info.id
     pagenumber = forum_info.page
@@ -65,7 +69,11 @@ class ForumsPageResponse(BaseModel):
     forums: List[ForumResponse]
     page_count:int
 
-@app.post('/api/forums')
+@app.post('/api/forums',responses={
+        200: {
+            "description": "Success response",
+            "model": ForumsPageResponse
+        }})
 async def api_forums_page(forums_info:ForumsInfo):
     pagenumber = forums_info.page
     with sqlconn() as sql:
