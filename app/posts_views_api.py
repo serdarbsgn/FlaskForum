@@ -57,8 +57,8 @@ async def api_post_page(post_info:PostInfo):
         comment_count = sql.session.execute(Select.comments_count(id)).mappings().fetchone()
         comment_count = (comment_count["count"]-1)//20
         created_by = sql.session.execute(Select.user_username({"id":contents["user_id"]})).mappings().fetchone()["username"]
-        return PostPageResponse(contents = PostContentsResponse(**{k:v for k,v in contents.items()}),
-                                comments = [PostCommentsResponse(**comment) for comment in comments],
+        return PostPageResponse(contents = contents,
+                                comments = comments,
                                 created_by = created_by,comment_count=comment_count
                                 )
 class CreatePostInfo(BaseModel):

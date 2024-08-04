@@ -366,4 +366,4 @@ async def api_remove_profile_picture(request:Request):
             logging.warn(e)
         return MsgResponse(msg="Removed profile picture successfully.")
     
-import comments_views_api,forums_views_api,posts_views_api
+import comments_views_api,forums_views_api,posts_views_api,views_market_api

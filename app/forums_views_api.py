@@ -49,8 +49,8 @@ async def api_forum_page(forum_info:ForumInfo):
         postcount = sql.session.execute(Select.posts_count(id)).mappings().fetchone()
         postcount = (postcount["count"]-1)//10
         return ForumPageResponse(
-            contents=ForumContentsResponse(**{k:v for k,v in contents.items()}),
-            posts=[ForumPostsResponse(**post) for post in posts],
+            contents=contents,
+            posts=posts,
             postcount=postcount
         )
 
@@ -82,7 +82,7 @@ async def api_forums_page(forums_info:ForumsInfo):
             forum["link"] = "forum?id="+str(forum["id"])
         forumcount = sql.session.execute(Select.forums_count()).mappings().fetchone()
         forumcount = (forumcount["count"]-1)//5
-        return ForumsPageResponse(forums=[ForumResponse(**forum) for forum in forums],page_count=forumcount)
+        return ForumsPageResponse(forums=forums,page_count=forumcount)
     
 class ForumCreateInfo(BaseModel):
     name : str = Field(min_length=4)
