@@ -16,9 +16,10 @@ from app.helpers import *
 def gyrowheel_privacy_policy():
     return render_template('privacy-policy-for-gyrowheel-app.html')
 
-@app.route('/sidescroller',methods = ['GET'])
-def side_scroller():
-    return render_template('side-scroller.html',hide_header = request.args.get('hide_header',0,type=int))
+#On hold
+# @app.route('/sidescroller',methods = ['GET'])
+# def side_scroller():
+#     return render_template('side-scroller.html',hide_header = request.args.get('hide_header',0,type=int))
 
 @app.route('/canvas-home',methods = ['GET'])
 def canvas_home():
@@ -30,6 +31,10 @@ def canvas_home():
 
 @app.route('/snake',methods = ['GET'])
 def snake_js():
+    if "user" in session:
+        with sqlconn() as sql:
+            user_info = get_user_info(sql)
+            return render_template('snake-game.html',user=user_info["username"],hide_header = request.args.get('hide_header',0,type=int))
     return render_template('snake-game.html',hide_header = request.args.get('hide_header',0,type=int))
 
 @app.route('/favicon.ico',methods =['GET'])
@@ -39,14 +44,26 @@ def icon():
 
 @app.route('/physics',methods =['GET'])
 def physics():
+    if "user" in session:
+        with sqlconn() as sql:
+            user_info = get_user_info(sql)
+            return render_template('physics.html',user=user_info["username"],hide_header = request.args.get('hide_header',0,type=int))
     return render_template('physics.html',hide_header = request.args.get('hide_header',0,type=int))
 
 @app.route('/minesweeper',methods = ['GET'])
 def minesweeper_js():
+    if "user" in session:
+        with sqlconn() as sql:
+            user_info = get_user_info(sql)
+            return render_template('minesweeper-game.html',user=user_info["username"],hide_header = request.args.get('hide_header',0,type=int))
     return render_template('minesweeper-game.html',hide_header = request.args.get('hide_header',0,type=int))
 
 @app.route('/games',methods = ['GET'])
 def games():
+    if "user" in session:
+        with sqlconn() as sql:
+            user_info = get_user_info(sql)
+            return render_template('minesweeper-game.html',user=user_info["username"],hide_header = request.args.get('hide_header',0,type=int))
     return render_template('games.html',hide_header = request.args.get('hide_header',0,type=int))
 
 @app.route('/register', methods=['GET', 'POST'])
