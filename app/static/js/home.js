@@ -169,7 +169,10 @@ for (let index = 0; index < rectangles.length; index++) {
             rect.y += rect.vy;
             if(!colX){
             rect.vy += g;}
-
+            if (rect.x < -500 || rect.x > canvas.width + 500 || rect.y > canvas.height + 500){
+                rect.x = cw10;
+                rect.y = -ch10;
+            }
         }else{
             if (rect.x + rect.w >= rectangles[i].x &&
                 rect.x <= rectangles[i].x + rectangles[i].w &&
