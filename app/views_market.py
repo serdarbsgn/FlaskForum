@@ -1,6 +1,6 @@
 import uuid
 from app.flaskforms import AddProductForm,AddToCartForm,RemoveFromCartForm,UpdateCartForm
-from flask import redirect, url_for,render_template,request,session,flash,jsonify,escape
+from flask import redirect, url_for,render_template,request,session,flash,escape
 from app.sql_dependant.sql_read import Select
 from app.sql_dependant.sql_tables import Cart, Forum, Order, Product,OrderItem, ProductForum
 from app.sql_dependant.sql_connection import sqlconn

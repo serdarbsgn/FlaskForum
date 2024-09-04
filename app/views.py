@@ -16,6 +16,9 @@ from app.helpers import *
 def gyrowheel_privacy_policy():
     return render_template('privacy-policy-for-gyrowheel-app.html')
 
+@app.route('/gyrowheel',methods=['GET'])
+def gyrowheel_home():
+    return render_template('gyrowheel-home.html',hide_header = request.args.get('hide_header',0,type=int))
 #On hold
 # @app.route('/sidescroller',methods = ['GET'])
 # def side_scroller():
