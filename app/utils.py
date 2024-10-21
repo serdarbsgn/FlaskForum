@@ -1,3 +1,4 @@
+import re
 import jwt
 from .sql_dependant.env_init import JWT_SECRET_KEY,PASSWORD_SALT
 from hashlib import pbkdf2_hmac
@@ -23,3 +24,6 @@ def generate_hash(plain_password, password_salt=PASSWORD_SALT):
         10000,
     )
     return password_hash.hex()
+
+def is_valid_username(username):
+    return re.match(r'^[a-zA-Z0-9._-]+$', username)

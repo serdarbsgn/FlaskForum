@@ -8,7 +8,7 @@ from app.sql_dependant.sql_read import Select
 from app.sql_dependant.sql_tables import   User
 from app.sql_dependant.sql_connection import sqlconn
 from app.sql_dependant.sql_write import  Delete, Update
-from app.utils import generate_hash,generate_jwt_token,decode_jwt_token
+from app.utils import generate_hash,generate_jwt_token,decode_jwt_token, is_valid_username
 from PIL import Image
 from . import app
 from app.helpers import *
@@ -35,6 +35,8 @@ def api_register():
         if not set(["username", "email", "password"]).issubset(set(request.json.keys())):
             return jsonify({"msg":"Crucial information about register is missing."}),400
         register_info = (request.json["username"],request.json["email"],request.json["password"])
+        if not (is_valid_username(escape(register_info[0]))):
+            return jsonify({"msg":"Supply a valid username"})
         for el in register_info:
             if not isinstance(el,str) or len(el) == 0:
                 return jsonify({"msg":"All register info must be a string and not empty"}),400
@@ -78,6 +80,8 @@ def api_login():
         if not set(["username", "password"]).issubset(set(request.json.keys())):
             return jsonify({"msg":"Crucial information about login is missing."}),400
         login_info = (request.json["username"],request.json["password"])
+        if not (is_valid_username(escape(login_info[0]))):
+            return jsonify({"msg":"Supply a valid username"})
         sql = sqlconn()
         check = sql.session.execute(Select.user_exists_username_password(({"username":login_info[0],"password":generate_hash(login_info[1])}))).mappings().fetchall()
         if len(check)>0:

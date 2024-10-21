@@ -7,7 +7,7 @@ from app.sql_dependant.sql_read import Select
 from app.sql_dependant.sql_tables import   User
 from app.sql_dependant.sql_connection import sqlconn
 from app.sql_dependant.sql_write import  Delete, Update
-from app.utils import generate_hash
+from app.utils import generate_hash, is_valid_username
 from PIL import Image
 from . import app
 from app.helpers import *
@@ -73,6 +73,9 @@ def games():
 def register():
     form = RegisterForm()
     if form.validate_on_submit():
+        if not (is_valid_username(escape(form.username._value()))):
+            flash("Supply a valid username(Allowed special characters are -_.)")
+            return render_template('register.html', form=form,hide_header = request.args.get('hide_header',0,type=int)),401
         user = User(
             username=escape(form.username._value()),
             email=escape(form.email._value()),
@@ -92,6 +95,9 @@ def login():
     form = LoginForm()
     if form.validate_on_submit():
         sql = sqlconn()
+        if not (is_valid_username(escape(form.username._value()))):
+            flash("Supply a valid username(Allowed special characters are -_.)")
+            return render_template('login.html', form=form,hide_header = request.args.get('hide_header',0,type=int)),401
         check = sql.session.execute(Select.user_exists_username_password(({"username":form.username._value(),"password":generate_hash(form.password._value())}))).mappings().fetchall()
         if len(check)>0:
             session["user"] = check[0]["id"]
@@ -110,6 +116,9 @@ def change_username():
     form = UsernameForm()
     if form.validate_on_submit():
         with sqlconn() as sql:
+            if not (is_valid_username(escape(form.username._value()))):
+                flash("Supply a valid username(Allowed special characters are -_.)")
+                return redirect(url_for('home',hide_header = request.args.get('hide_header',0,type=int))),400
             check = sql.session.execute(Select.user_unique_username({"username":escape(form.username._value())})).mappings().fetchall()
             if len(check)>0:
                 flash("Username already exists")
