@@ -105,7 +105,7 @@ async def validate_login_token(login_info: LoginInfo) -> Dict[str, Any]:
 async def api_login_post(login_info: LoginInfo, token_validity: Dict[str, Any] = Depends(validate_login_token)):
         login_info = (token_validity["username"],token_validity["password"])
         if not (is_valid_username(escape(login_info[0]))):
-            raise HTTPException(status_code=400, detail="Supply a valid username")
+            raise HTTPException(status_code=400, detail="Supply a valid username(Allowed special characters are -_.)")
         with sqlconn() as sql:
             check = sql.session.execute(Select.user_exists_username_password(({"username":login_info[0],"password":generate_hash(login_info[1])}))).mappings().fetchall()
             if len(check)>0:
@@ -209,6 +209,8 @@ class UsernameInfo(BaseModel):
 async def api_change_username(request:Request,username_info:UsernameInfo):
     auth_check = check_auth(request)
     with sqlconn() as sql:
+        if not (is_valid_username(escape(request.json["username"]))):
+            raise HTTPException(status_code=400, detail="Supply a valid username(Allowed special characters are -_.)")
         check = sql.session.execute(Select.user_unique_username({"username":escape(request.json["username"])})).mappings().fetchall()
         if len(check)>0:
             raise HTTPException(status_code=400, detail="Requested username already exists")
