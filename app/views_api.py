@@ -4,6 +4,8 @@ import logging
 import os
 from typing import Any, Dict
 import uuid
+
+from fastapi.responses import FileResponse, JSONResponse
 from main import app
 from fastapi import Depends, File, HTTPException, Request, UploadFile
 from dateutil.relativedelta import relativedelta
@@ -273,7 +275,8 @@ async def api_remove_account(request:Request,username_info:UsernameInfo):
             get_user_pp_location = sql.session.execute(Select.user_profile_picture({"user":username})).mappings().fetchone()
             if get_user_pp_location["profile_picture"]:
                 try:
-                    os.remove(project_dir+"/static/"+profile_photos_dir+get_user_pp_location["profile_picture"])
+                    location = os.path.join(project_dir,"static",profile_photos_dir,get_user_pp_location["profile_picture"])
+                    os.remove(location)
                 except FileNotFoundError:
                     pass
             sql.session.execute(Delete.user({"id":auth_check["user"],"username":username}))
@@ -329,7 +332,7 @@ async def api_userstats(request:Request):
 async def api_add_profile_picture(request:Request,file: UploadFile = File(...)):
     auth_check = check_auth(request)
     rand = "pp-" + str(uuid.uuid4()) + ".jpg"
-    filepath = os.path.join(project_dir, "static", profile_photos_dir, rand)
+    filepath = os.path.join(project_dir,"static",profile_photos_dir,rand)
     with open(filepath, "wb") as buffer:
         buffer.write(await file.read())
     try:
@@ -365,11 +368,24 @@ async def api_remove_profile_picture(request:Request):
         sql.session.execute(Update.user_profile_picture({"id":user["username"],"profile_picture":None}))
         sql.commit()
         try:
-            os.remove(project_dir+"/static"+profile_photos_dir+picture["profile_picture"])
+            filepath = os.path.join(project_dir,"static",profile_photos_dir,picture["profile_picture"])
+            os.remove(filepath)
         except FileNotFoundError:
             pass
         except Exception as e:
             logging.warn(e)
         return MsgResponse(msg="Removed profile picture successfully.")
     
+@app.get("/api/profile-picture/{picture_name}")
+async def api_serve_static_profile_picture(picture_name:str):
+    if not (is_valid_username(escape(picture_name))):#since images are saved as uuid.jpg, this is a good way to check it.
+        raise HTTPException(status_code=400, detail="This is not a valid file to read.")
+    pic_name = escape(picture_name)
+    file_path = os.path.join(project_dir,"static",profile_photos_dir,pic_name)
+    if os.path.exists(file_path):
+        return FileResponse(file_path)
+    else:
+        return JSONResponse(content={"detail": "Image not found."}, status_code=404)
+
+
 import comments_views_api,forums_views_api,posts_views_api,views_market_api

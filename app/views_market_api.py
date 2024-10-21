@@ -88,7 +88,7 @@ def api_market():
     with sqlconn() as sql:
         products = listify(sql.session.execute(Select.products()).mappings().fetchall())
         for product in products:
-            product["image"] = product_photos_dir+product["image"]
+            product["image"] = os.path.join(product_photos_dir,product["image"])
         return ProductsResponse(products=products)
 
 class ARCartInfo(BaseModel):
@@ -153,7 +153,7 @@ async def api_add_product(request:Request,add_product_info:AddProductInfo,file: 
 
     with sqlconn() as sql:
         rand= "p-"+str(uuid.uuid4())+".jpg"
-        filepath = project_dir+"/static/"+product_photos_dir+rand
+        filepath = os.path.join(project_dir,"static",product_photos_dir,rand)
         file = request.files['file']
         with open(filepath, "wb") as buffer:
             buffer.write(await file.read())
