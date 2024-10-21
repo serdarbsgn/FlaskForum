@@ -13,7 +13,7 @@ from sql_dependant.sql_tables import   User
 from sql_dependant.sql_connection import sqlconn
 from sql_dependant.sql_write import  Delete, Update
 from pydantic import BaseModel, EmailStr, Field
-from utils import check_auth, decode_jwt_token, generate_jwt_token,generate_hash
+from utils import check_auth, decode_jwt_token, generate_jwt_token,generate_hash, is_valid_username
 from helpers import project_dir,profile_photos_dir
 
 class UserInfo(BaseModel):
@@ -104,6 +104,8 @@ async def validate_login_token(login_info: LoginInfo) -> Dict[str, Any]:
         })
 async def api_login_post(login_info: LoginInfo, token_validity: Dict[str, Any] = Depends(validate_login_token)):
         login_info = (token_validity["username"],token_validity["password"])
+        if not (is_valid_username(escape(login_info[0]))):
+            raise HTTPException(status_code=400, detail="Supply a valid username")
         with sqlconn() as sql:
             check = sql.session.execute(Select.user_exists_username_password(({"username":login_info[0],"password":generate_hash(login_info[1])}))).mappings().fetchall()
             if len(check)>0:
@@ -168,6 +170,8 @@ async def validate_register_token(register_info: RegisterInfo) -> Dict[str, Any]
         })
 async def api_register_post(register_info: RegisterInfo, token_validity: Dict[str, Any] = Depends(validate_register_token)):
         register_info = (token_validity["username"],token_validity["email"],token_validity["password"])
+        if not (is_valid_username(escape(register_info[0]))):
+            raise HTTPException(status_code=400, detail="Supply a valid username")
         user = User(
             username=escape(register_info[0]),
             email=escape(register_info[1]),

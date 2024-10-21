@@ -1,4 +1,5 @@
 from datetime import datetime
+import re
 from fastapi import HTTPException
 import jwt
 from sql_dependant.env_init import JWT_SECRET_KEY,PASSWORD_SALT
@@ -36,3 +37,5 @@ def check_auth(request):
             return test
     raise HTTPException(status_code=401, detail="Can't get the user because token is expired or wrong.")
 
+def is_valid_username(username):
+    return re.match(r'^[a-zA-Z0-9._-]+$', username)
