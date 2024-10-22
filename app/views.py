@@ -14,10 +14,18 @@ from app.helpers import *
 
 @app.route('/privacy-policy-for-gyrowheel-app',methods=['GET'])
 def gyrowheel_privacy_policy():
+    if "user" in session:
+        with sqlconn() as sql:
+            user_info = get_user_info(sql)
+            return render_template('privacy-policy-for-gyrowheel-app.html',user=user_info["username"],hide_header = request.args.get('hide_header',0,type=int))
     return render_template('privacy-policy-for-gyrowheel-app.html')
 
 @app.route('/gyrowheel',methods=['GET'])
 def gyrowheel_home():
+    if "user" in session:
+        with sqlconn() as sql:
+            user_info = get_user_info(sql)
+            return render_template('gyrowheel-home.html',user=user_info["username"],hide_header = request.args.get('hide_header',0,type=int))
     return render_template('gyrowheel-home.html',hide_header = request.args.get('hide_header',0,type=int))
 #On hold
 # @app.route('/sidescroller',methods = ['GET'])
@@ -66,7 +74,7 @@ def games():
     if "user" in session:
         with sqlconn() as sql:
             user_info = get_user_info(sql)
-            return render_template('minesweeper-game.html',user=user_info["username"],hide_header = request.args.get('hide_header',0,type=int))
+            return render_template('games.html',user=user_info["username"],hide_header = request.args.get('hide_header',0,type=int))
     return render_template('games.html',hide_header = request.args.get('hide_header',0,type=int))
 
 @app.route('/register', methods=['GET', 'POST'])
