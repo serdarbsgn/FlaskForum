@@ -104,7 +104,7 @@ async def validate_login_token(login_info: LoginInfo) -> Dict[str, Any]:
             "model": ErrorResponse
         }
         })
-async def api_login_post(login_info: LoginInfo, token_validity: Dict[str, Any] = Depends(validate_login_token)):
+async def api_login_post(token_validity: Dict[str, Any] = Depends(validate_login_token)):
         login_info = (token_validity["username"],token_validity["password"])
         if not (is_valid_username(escape(login_info[0]))):
             raise HTTPException(status_code=400, detail="Supply a valid username(Allowed special characters are -_.)")
@@ -137,7 +137,7 @@ class RegisterInfo(BaseModel):
     username: str = Field(min_length=4, max_length=20)
     email:EmailStr
     password: str = Field(min_length=8, max_length=20)
-
+        
 async def validate_register_token(register_info: RegisterInfo) -> Dict[str, Any]:
     token = register_info.token
     if not token:
@@ -170,7 +170,7 @@ async def validate_register_token(register_info: RegisterInfo) -> Dict[str, Any]
             "model": ErrorResponse
         },
         })
-async def api_register_post(register_info: RegisterInfo, token_validity: Dict[str, Any] = Depends(validate_register_token)):
+async def api_register_post(token_validity: Dict[str, Any] = Depends(validate_register_token)):
         register_info = (token_validity["username"],token_validity["email"],token_validity["password"])
         if not (is_valid_username(escape(register_info[0]))):
             raise HTTPException(status_code=400, detail="Supply a valid username")
