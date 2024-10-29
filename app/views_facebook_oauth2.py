@@ -58,7 +58,14 @@ def facebook_callback():
             exists = sql.session.execute(Select.user_oauth2_email_exists(user_data)).mappings().fetchone()
             if exists:
                 session["user"] = exists["id"]
-                return redirect(url_for('home')),200
+                expire_at = str(datetime.datetime.now()+relativedelta(hours=4))
+                auth_jwt_token = utils.generate_jwt_token({"expire_at":expire_at,"user":exists["id"]})
+                return f'''
+                    <script>
+                        sessionStorage.setItem("loginJwt", "{auth_jwt_token}");
+                        window.location.href = "{url_for('home')}";
+                    </script>
+                ''',200
             flash("Something went wrong"),400
             return redirect(url_for('home')),200
     else:
