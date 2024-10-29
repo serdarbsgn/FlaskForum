@@ -16,7 +16,7 @@ from sql_dependant.sql_connection import sqlconn
 from sql_dependant.sql_write import  Delete, Update
 from pydantic import BaseModel, EmailStr, Field
 from utils import check_auth, decode_jwt_token, generate_jwt_token,generate_hash, is_valid_username
-from helpers import project_dir,profile_photos_dir
+from helpers import profile_photos_dir,flask_dir
 
 class UserInfo(BaseModel):
     username: str
@@ -275,7 +275,7 @@ async def api_remove_account(request:Request,username_info:UsernameInfo):
             get_user_pp_location = sql.session.execute(Select.user_profile_picture({"user":username})).mappings().fetchone()
             if get_user_pp_location["profile_picture"]:
                 try:
-                    location = os.path.join(project_dir,"static",profile_photos_dir,get_user_pp_location["profile_picture"])
+                    location = os.path.join(flask_dir,"static",profile_photos_dir,get_user_pp_location["profile_picture"])
                     os.remove(location)
                 except FileNotFoundError:
                     pass
@@ -332,7 +332,7 @@ async def api_userstats(request:Request):
 async def api_add_profile_picture(request:Request,file: UploadFile = File(...)):
     auth_check = check_auth(request)
     rand = "pp-" + str(uuid.uuid4()) + ".jpg"
-    filepath = os.path.join(project_dir,"static",profile_photos_dir,rand)
+    filepath = os.path.join(flask_dir,"static",profile_photos_dir,rand)
     with open(filepath, "wb") as buffer:
         buffer.write(await file.read())
     try:
@@ -368,7 +368,7 @@ async def api_remove_profile_picture(request:Request):
         sql.session.execute(Update.user_profile_picture({"id":user["username"],"profile_picture":None}))
         sql.commit()
         try:
-            filepath = os.path.join(project_dir,"static",profile_photos_dir,picture["profile_picture"])
+            filepath = os.path.join(flask_dir,"static",profile_photos_dir,picture["profile_picture"])
             os.remove(filepath)
         except FileNotFoundError:
             pass
@@ -381,7 +381,7 @@ async def api_serve_static_profile_picture(picture_name:str):
     if not (is_valid_username(escape(picture_name))):#since images are saved as uuid.jpg, this is a good way to check it.
         raise HTTPException(status_code=400, detail="This is not a valid file to read.")
     pic_name = escape(picture_name)
-    file_path = os.path.join(project_dir,"static",profile_photos_dir,pic_name)
+    file_path = os.path.join(flask_dir,"static",profile_photos_dir,pic_name)
     if os.path.exists(file_path):
         return FileResponse(file_path)
     else:

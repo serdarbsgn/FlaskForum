@@ -153,7 +153,7 @@ async def api_add_product(request:Request,add_product_info:AddProductInfo,file: 
 
     with sqlconn() as sql:
         rand= "p-"+str(uuid.uuid4())+".jpg"
-        filepath = os.path.join(project_dir,"static",product_photos_dir,rand)
+        filepath = os.path.join(flask_dir,"static",product_photos_dir,rand)
         file = request.files['file']
         with open(filepath, "wb") as buffer:
             buffer.write(await file.read())
