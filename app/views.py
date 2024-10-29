@@ -219,12 +219,12 @@ def logout():
         session.pop('picture',None)
     if request.args.get('hide_header',0,type=int):
             return '''<script>
-                sessionStorage.removeItem("jwtToken");
+                sessionStorage.removeItem('loginJwt');
                 parent.postMessage({"response":"Logged Out"});
               </script>'''
     return f'''
             <script>
-                sessionStorage.removeItem("jwtToken");
+                sessionStorage.removeItem('loginJwt');
                 window.location.href = "{url_for('home', hide_header=request.args.get('hide_header', 0, type=int))}";
             </script>
         ''',200
