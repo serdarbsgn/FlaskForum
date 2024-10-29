@@ -218,8 +218,16 @@ def logout():
         session.pop('username',None)
         session.pop('picture',None)
     if request.args.get('hide_header',0,type=int):
-        return '<script>parent.postMessage({"response":"Logged Out"});</script>'
-    return redirect(url_for('home',hide_header = request.args.get('hide_header',0,type=int))),200
+            return '''<script>
+                sessionStorage.removeItem("jwtToken");
+                parent.postMessage({"response":"Logged Out"});
+              </script>'''
+    return f'''
+            <script>
+                sessionStorage.removeItem("jwtToken");
+                window.location.href = "{url_for('home', hide_header=request.args.get('hide_header', 0, type=int))}";
+            </script>
+        ''',200
 
 @app.route('/', methods=['GET'])
 @app.route('/home', methods=['GET'])
