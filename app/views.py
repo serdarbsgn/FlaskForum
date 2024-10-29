@@ -1,3 +1,4 @@
+from datetime import datetime
 import logging
 import uuid
 
@@ -7,7 +8,8 @@ from app.sql_dependant.sql_read import Select
 from app.sql_dependant.sql_tables import   User
 from app.sql_dependant.sql_connection import sqlconn
 from app.sql_dependant.sql_write import  Delete, Update
-from app.utils import generate_hash, is_valid_username
+from app.utils import generate_hash, generate_jwt_token, is_valid_username
+from dateutil.relativedelta import relativedelta
 from PIL import Image
 from . import app
 from app.helpers import *
@@ -109,9 +111,19 @@ def login():
         check = sql.session.execute(Select.user_exists_username_password(({"username":form.username._value(),"password":generate_hash(form.password._value())}))).mappings().fetchall()
         if len(check)>0:
             session["user"] = check[0]["id"]
+            expire_at = str(datetime.now()+relativedelta(hours=4))
+            auth_jwt_token = generate_jwt_token({"expire_at":expire_at,"user":check[0]["id"]})
             if request.args.get('hide_header',0,type=int):
-                return '<script>parent.postMessage({"response":"Logged In"});</script>'
-            return redirect(url_for('home',hide_header = request.args.get('hide_header',0,type=int))),200
+                return f'''<script>sessionStorage.setItem("jwtToken", "{auth_jwt_token}");
+                parent.postMessage({{"response":"Logged In"}});
+                </script>
+                '''
+            return f'''
+                    <script>
+                        sessionStorage.setItem("jwtToken", "{auth_jwt_token}");
+                        window.location.href = "{url_for('home', hide_header=request.args.get('hide_header', 0, type=int))}";
+                    </script>
+                ''',200
         else: 
             flash("You are a fraud")
             return render_template('login.html', form=form,hide_header = request.args.get('hide_header',0,type=int)),401
