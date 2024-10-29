@@ -114,13 +114,13 @@ def login():
             expire_at = str(datetime.now()+relativedelta(hours=4))
             auth_jwt_token = generate_jwt_token({"expire_at":expire_at,"user":check[0]["id"]})
             if request.args.get('hide_header',0,type=int):
-                return f'''<script>sessionStorage.setItem("jwtToken", "{auth_jwt_token}");
+                return f'''<script>sessionStorage.setItem("loginJwt", "{auth_jwt_token}");
                 parent.postMessage({{"response":"Logged In"}});
                 </script>
                 '''
             return f'''
                     <script>
-                        sessionStorage.setItem("jwtToken", "{auth_jwt_token}");
+                        sessionStorage.setItem("loginJwt", "{auth_jwt_token}");
                         window.location.href = "{url_for('home', hide_header=request.args.get('hide_header', 0, type=int))}";
                     </script>
                 ''',200
