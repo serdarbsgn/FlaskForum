@@ -173,7 +173,7 @@ async def validate_register_token(register_info: RegisterInfo) -> Dict[str, Any]
 async def api_register_post(token_validity: Dict[str, Any] = Depends(validate_register_token)):
         register_info = (token_validity["username"],token_validity["email"],token_validity["password"])
         if not (is_valid_username(escape(register_info[0]))):
-            raise HTTPException(status_code=400, detail="Supply a valid username")
+            raise HTTPException(status_code=400, detail="Supply a valid username(Allowed special characters are -_.)")
         user = User(
             username=escape(register_info[0]),
             email=escape(register_info[1]),
@@ -309,8 +309,8 @@ async def api_userstats(request:Request):
         user_scores = {
             "comment_count":sql.session.execute(Select.user_comment_count({"user_id":auth_check["user"]})).mappings().fetchone()["count"],
             "post_count":sql.session.execute(Select.user_post_count({"user_id":auth_check["user"]})).mappings().fetchone()["count"],
-            "comment_karma":sql.session.execute(Select.user_karma_point_comment({"user_id":auth_check["user"]})).mappings().fetchone()["sum"],
-            "post_karma":sql.session.execute(Select.user_karma_point_post({"user_id":auth_check["user"]})).mappings().fetchone()["sum"]
+            "comment_karma":sql.session.execute(Select.user_karma_point_comment({"user_id":auth_check["user"]})).mappings().fetchone()["sum"] or 0,
+            "post_karma":sql.session.execute(Select.user_karma_point_post({"user_id":auth_check["user"]})).mappings().fetchone()["sum"] or 0
         }
         return UserStatsResponse(scores=UserScores(comment_count=user_scores["comment_count"],post_count=user_scores["post_count"],comment_karma=user_scores["comment_karma"],post_karma=user_scores["post_karma"]))
 

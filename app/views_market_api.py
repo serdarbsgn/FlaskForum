@@ -166,7 +166,7 @@ async def api_add_product(request:Request,add_product_info:AddProductInfo,file: 
             raise HTTPException(status_code=400, detail="This is not a valid image")
         product = Product(
             name = escape(add_product_info.name),
-            description = escape(add_product_info.description),
+            description = limit_line_breaks(escape(add_product_info.description),31),
             price = Decimal(escape(add_product_info.price)),
             image = rand
         )
@@ -185,7 +185,7 @@ async def api_add_product(request:Request,add_product_info:AddProductInfo,file: 
         else:
             product_forum = Forum(
             name=escape("Product: " + request.form["name"]),
-            description=escape(request.form["description"]))
+            description=limit_line_breaks(escape(request.form["description"]),31))
             sql.session.add(product_forum)
             sql.commit()
             forumid = sql.session.execute(Select.forum_exists(escape("Product: " + request.form["name"]))).fetchone()[0]

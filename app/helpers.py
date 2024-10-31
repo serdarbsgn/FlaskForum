@@ -13,3 +13,13 @@ def listify(map):
         templist.append(dicx)
     return templist
 
+def limit_line_breaks(content:str, max_line_breaks=255):
+    lines = content.splitlines()
+    new_content = ""
+    for i,line in enumerate(lines):
+        if i<max_line_breaks:
+            new_content += f'{line}<br>'
+        else:
+            new_content += ' '.join(lines[i:])
+            break
+    return new_content.rstrip('<br>')

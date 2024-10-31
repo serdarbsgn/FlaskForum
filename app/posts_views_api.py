@@ -1,19 +1,14 @@
 from datetime import datetime
 from html import escape
-from typing import List, Optional
 from fastapi import HTTPException, Request
 from pydantic import BaseModel, Field
+from helpers import limit_line_breaks
 from sql_dependant.sql_read import Select
 from sql_dependant.sql_tables import  Post, PostLikes
 from sql_dependant.sql_connection import sqlconn
 from sql_dependant.sql_write import Update,Delete
 from views_api import MsgResponse, check_auth
 from main import app
-from helpers import listify
-
-class PostInfo(BaseModel):
-    id: int
-    page: Optional[int] = 0
 
 class PostCommentsResponse(BaseModel):
     id : int
@@ -37,41 +32,34 @@ class PostContentsResponse(BaseModel):
 
 class PostPageResponse(BaseModel):
     contents:PostContentsResponse
-    comments:List[PostCommentsResponse]
     created_by:str
-    comment_count:int
 
-@app.post('/api/post',responses={
+@app.get('/api/post/{post_id}',responses={
         200: {
             "description": "Success response",
             "model": PostPageResponse
         }})
-async def api_post_page(post_info:PostInfo):
-    id = post_info.id
-    pagenumber = post_info.page
+async def api_post_page(post_id:int):
+    id = post_id
     with sqlconn() as sql:
         contents = sql.session.execute(Select.post_page(id)).mappings().fetchone()
         if not contents:
             raise HTTPException(status_code=400, detail="This post doesn't exist")
-        comments = listify(sql.session.execute(Select.comments({"id":id,"page":pagenumber})).mappings().fetchall())
-        comment_count = sql.session.execute(Select.comments_count(id)).mappings().fetchone()
-        comment_count = (comment_count["count"]-1)//20
         created_by = sql.session.execute(Select.user_username({"id":contents["user_id"]})).mappings().fetchone()["username"]
         return PostPageResponse(contents = contents,
-                                comments = comments,
-                                created_by = created_by,comment_count=comment_count
-                                )
+                                created_by = created_by)
+    
 class CreatePostInfo(BaseModel):
     forum_id : int
     title : str = Field(min_length=4)
     content : str = Field(min_length=4)
 
-@app.post('/api/create/post')
+@app.post('/api/post')
 async def api_create_post(request:Request,create_post_info:CreatePostInfo):
     auth_check = check_auth(request)
     forum_id = create_post_info.forum_id
     title=escape(create_post_info.title)
-    content=escape(create_post_info.content)
+    content=limit_line_breaks(escape(create_post_info.content),63)
     with sqlconn() as sql:
         post = Post(
             user_id = auth_check["user"],
@@ -87,12 +75,12 @@ class UpdatePostInfo(BaseModel):
     title : str = Field(min_length=4)
     content : str = Field(min_length=4)
 
-@app.post('/api/update/post')
+@app.put('/api/post')
 async def api_update_post(request:Request,update_post_info:UpdatePostInfo):
     auth_check = check_auth(request)
     post_id = update_post_info.post_id
     title=escape(update_post_info.title)
-    content=escape(update_post_info.content)
+    content=limit_line_breaks(escape(update_post_info.content),63)
     with sqlconn() as sql:
         sql.session.execute(Update.post({"user_id":auth_check["user"],"post_id":post_id,
                                         "title":title,"content":content}))
@@ -102,7 +90,7 @@ async def api_update_post(request:Request,update_post_info:UpdatePostInfo):
 class DLDPostInfo(BaseModel):
     post_id : int
 
-@app.post('/api/delete/post')
+@app.delete('/api/post')
 async def api_delete_post(request:Request,delete_post_info:DLDPostInfo):
     auth_check = check_auth(request)
     post_id = delete_post_info.post_id
@@ -122,6 +110,15 @@ async def api_like_post(request:Request,like_post_info:DLDPostInfo):
     post_id = like_post_info.post_id
 
     with sqlconn() as sql:
+        def add_like():
+            like = PostLikes(
+                user_id = auth_check["user"],
+                post_id = post_id,
+                l_d = "Like"
+            )
+            sql.session.add(like)
+            sql.session.execute(Update.post_user_like_post({"post_id":post_id}))
+            sql.session.commit()
         check_l_d_exists = sql.session.execute(Select.postlikes_exists({"user_id":auth_check["user"],"post_id":post_id})).mappings().fetchone()
         if check_l_d_exists:
             if check_l_d_exists["l_d"] == "Like":
@@ -133,14 +130,9 @@ async def api_like_post(request:Request,like_post_info:DLDPostInfo):
                 sql.session.execute(Delete.postlikes({"user_id":auth_check["user"],"post_id":post_id,"l_d":"Dislike"}))
                 sql.session.execute(Update.post_user_like_post({"post_id":post_id}))
                 sql.session.commit()
-        like = PostLikes(
-            user_id = auth_check["user"],
-            post_id = post_id,
-            l_d = "Like"
-        )
-        sql.session.add(like)
-        sql.session.execute(Update.post_user_like_post({"post_id":post_id}))
-        sql.session.commit()
+                add_like()
+                return MsgResponse(msg="Liked2")
+        add_like()
         return MsgResponse(msg="Liked")
 
 @app.post('/api/post/dislike')
@@ -149,23 +141,27 @@ async def api_dislike_post(request:Request,dislike_post_info:DLDPostInfo):
     post_id = dislike_post_info.post_id
 
     with sqlconn() as sql:
+        def add_dislike():
+            like = PostLikes(
+            user_id = auth_check["user"],
+            post_id = post_id,
+            l_d = "Dislike"
+        )
+            sql.session.add(like)
+            sql.session.execute(Update.post_user_dislike_post({"post_id":post_id}))
+            sql.session.commit()
         check_l_d_exists = sql.session.execute(Select.postlikes_exists({"user_id":auth_check["user"],"post_id":post_id})).mappings().fetchone()
         if check_l_d_exists:
             if check_l_d_exists["l_d"] == "Like":
                 sql.session.execute(Delete.postlikes({"user_id":auth_check["user"],"post_id":post_id,"l_d":"Like"}))
                 sql.session.execute(Update.post_user_dislike_post({"post_id":post_id}))
                 sql.session.commit()
+                add_dislike()
+                return MsgResponse(msg="Disliked2")
             elif check_l_d_exists["l_d"] == "Dislike":
                 sql.session.execute(Delete.postlikes({"user_id":auth_check["user"],"post_id":post_id,"l_d":"Dislike"}))
                 sql.session.execute(Update.post_user_like_post({"post_id":post_id}))
                 sql.session.commit()
                 return MsgResponse(msg="Undisliked")
-        like = PostLikes(
-            user_id = auth_check["user"],
-            post_id = post_id,
-            l_d = "Dislike"
-        )
-        sql.session.add(like)
-        sql.session.execute(Update.post_user_dislike_post({"post_id":post_id}))
-        sql.session.commit()
+        add_dislike()
         return MsgResponse(msg="Disliked")
