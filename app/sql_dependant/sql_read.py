@@ -1,5 +1,5 @@
 import uuid
-from sqlalchemy import  delete, func, select, update,desc,not_,exists
+from sqlalchemy import  delete, func, literal, select, update,desc,not_,exists
 from sqlalchemy.orm import aliased
 from sqlalchemy.dialects.mysql import insert
 from sql_dependant.sql_tables import *
@@ -74,21 +74,29 @@ class Select():
     def comment(data):
         return select(Comment.id,Comment.parent_id,Comment.user_id,Comment.content,Comment.likes,Comment.created_at,Comment.updated_at).where(Comment.id == data)
     
-    def comments(data):
-        CommentAlias = aliased(Comment)
-        return select(Comment.id,Comment.parent_id,User.username,Comment.content,Comment.likes,Comment.created_at,Comment.updated_at,exists().where(CommentAlias.parent_id == Comment.id,Comment.post_id == data["id"]
-            ).label('has_replies')).join(User,Comment.user_id == User.id).where(
-            Comment.post_id == data["id"],Comment.parent_id == 0).limit(20).offset(data["page"]*20).order_by(Comment.id)
     
     def comments_count(data):
         return select(count(Comment.id)).where(Comment.post_id==data,Comment.parent_id == 0)
     
     def replies_of_comment(data):
-        CommentAlias = aliased(Comment)
-        return select(Comment.id,Comment.parent_id,User.username,Comment.content,Comment.likes,Comment.created_at,Comment.updated_at,exists().where(CommentAlias.parent_id == Comment.id,Comment.post_id == data["post_id"]
-           ).label('has_replies')).join(User,Comment.user_id == User.id).where(
-           Comment.post_id == data["post_id"],Comment.parent_id == data["parent_id"]).order_by(Comment.id)
+        if "user_id" in data:
+            return Select.project_comments_logged_in(data)
+        return Select.project_comments_not_logged_in(data)
     
+    def project_comments_not_logged_in(data):
+        CommentAlias = aliased(Comment)
+        return select(Comment.id,Comment.parent_id,User.username,Comment.content,Comment.likes,Comment.created_at,Comment.updated_at,literal(None).label('l_d'),exists().where(CommentAlias.parent_id == Comment.id,Comment.post_id == data["post_id"]
+           ).label('replies')).join(User,Comment.user_id == User.id).where(
+           Comment.post_id == data["post_id"],Comment.parent_id == data["parent_id"]).order_by(Comment.id).limit(50).offset(data["page"]*50)
+    
+    def project_comments_logged_in(data):
+        CommentAlias = aliased(Comment)
+        return select(Comment.id,Comment.parent_id,User.username,Comment.content,Comment.likes,Comment.created_at,Comment.updated_at,CommentLikes.l_d,select(count(CommentAlias.id)).where(CommentAlias.parent_id == Comment.id,Comment.post_id == data["post_id"]
+           ).label('replies')).join(User,Comment.user_id == User.id).outerjoin(
+        CommentLikes,(CommentLikes.comment_id == Comment.id) & (CommentLikes.user_id == data["user_id"])).where(
+           Comment.post_id == data["post_id"],Comment.parent_id == data["parent_id"]).order_by(Comment.id).limit(50).offset(data["page"]*50)
+
+
     def products():
         statement = select(Product.id,Product.name,Product.description,Product.price,Product.image,ProductForum.forum_id).join(ProductForum,Product.id == ProductForum.product_id)
         return statement

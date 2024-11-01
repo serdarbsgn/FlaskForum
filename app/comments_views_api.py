@@ -36,18 +36,19 @@ class CommentInfo(BaseModel):
     comment_id: int
 
 @app.delete('/api/post/comment')
-async def api_delete_comment(request:Request,delete_comment_info:CommentInfo):
+async def api_delete_comment(request:Request,comment_id: int):
     auth_check = check_auth(request)
-    comment_id = delete_comment_info.comment_id
-
+    user_id = auth_check["user"]
+    comment_id = comment_id
+    print(comment_id)
     with sqlconn() as sql:
         check_comment_exists = sql.session.execute(Select.comment(comment_id)).mappings().fetchone()
         if not check_comment_exists:
             raise HTTPException(status_code=400, detail="You can't delete what doesn't exist.")
         
-        if not (check_comment_exists["user_id"] == auth_check["user_id"]):
+        if not (check_comment_exists["user_id"] == user_id):
             raise HTTPException(status_code=400, detail="You can't delete a comment someone else created.")
-        sql.session.execute(Delete.comment({"user_id":auth_check["user_id"],"comment_id":comment_id}))
+        sql.session.execute(Delete.comment({"user_id":user_id,"comment_id":comment_id}))
         sql.session.commit()
         return MsgResponse(msg="Deleted comment")
 
@@ -58,12 +59,14 @@ class RepliesInfo(BaseModel):
 class ReplyResponse(BaseModel):
     content: str
     created_at: datetime
-    has_replies: bool
+    replies: int
     id: int
     likes:int
-    parent_id:int
+    parent_id: int
+    l_d: str|None
     updated_at: datetime
-    username:str
+    username: str
+
 
 class RepliesResponse(BaseModel):
     replies : List[ReplyResponse]
@@ -73,14 +76,19 @@ class RepliesResponse(BaseModel):
             "description": "Success response",
             "model": RepliesResponse
         }})
-async def api_fetch_replies(request:Request,post_id:int,parent_id: Optional[int] = 0, page: Optional[int] = 0):
+async def fetch_post_comments(request:Request,post_id:str,parent_id: Optional[int] = 0, page: Optional[int] = 0):
     with sqlconn() as sql:
-        replies = listify(sql.session.execute(Select.replies_of_comment({"post_id":post_id,"parent_id":parent_id})).mappings().fetchall())
+        data = {"post_id":post_id,"parent_id":parent_id,"page":page}
+        try:
+            user_info = check_auth(request)
+            data["user_id"] = user_info["user"]
+        except:
+            pass
+        replies = sql.session.execute(Select.replies_of_comment(data)).mappings().fetchall()
         return RepliesResponse(replies = replies)
 
-
 @app.get('/api/post/{post_id}/comment/like')
-def api_like_comment(request:Request,post_id:int,comment_id: Optional[int] = 0):
+def api_like_comment(request:Request,post_id:int,comment_id: int):
     auth_check = check_auth(request)
     user_id = auth_check["user"]
     comment_id = comment_id
@@ -111,7 +119,7 @@ def api_like_comment(request:Request,post_id:int,comment_id: Optional[int] = 0):
         return MsgResponse(msg="Liked")
 
 @app.get('/api/post/{post_id}/comment/dislike')
-async def api_dislike_comment(request:Request,post_id:int,comment_id: Optional[int] = 0):
+async def api_dislike_comment(request:Request,post_id:int,comment_id: int):
     auth_check = check_auth(request)
     user_id = auth_check["user"]
     comment_id = comment_id
