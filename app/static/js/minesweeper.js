@@ -1,6 +1,13 @@
 
 //make sure to have a <canvas id="gameCanvas" width="800" height="800"></canvas> canvas object like this before importing it.
 const canvas = document.getElementById('gameCanvas');
+if (window.innerWidth > window.innerHeight) {
+canvas.width = 690;
+canvas.height = 390;
+} else {
+canvas.width = 390;
+canvas.height = 690;
+}
 const ctx = canvas.getContext('2d');
 const playPauseText = "Left Click on a Tile to Start"
 const controlsText = "Middle Mouse Button Resets Game"

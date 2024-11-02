@@ -1,7 +1,7 @@
 //make sure to have a <canvas id="gameCanvas" width="800" height="800"></canvas> canvas object like this before importing it.
 const canvas = document.getElementById('gameCanvas');
-canvas.width = window.innerWidth
-canvas.height = window.innerHeight
+canvas.width = parseInt(window.innerWidth/10)*9;
+canvas.height = parseInt(window.innerHeight/10)*8;
 const ctx = canvas.getContext('2d');
 let mouseCoordinates = [0,0]
 let heldRectLastCoords = [0,0]

@@ -1,6 +1,6 @@
 const canvas = document.getElementById('gameCanvas');//make sure to have a <canvas id="gameCanvas" width="800" height="800"></canvas> canvas object like this before importing it.
-canvas.width = parseInt(window.innerWidth/10)*10;
-canvas.height = parseInt(window.innerHeight/10)*10;
+canvas.width = parseInt(window.innerWidth/10)*8;
+canvas.height = parseInt(window.innerHeight/10)*8;
 const ctx = canvas.getContext('2d');
 const Direction = {
 UP: 'UP',
