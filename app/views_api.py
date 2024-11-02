@@ -16,7 +16,7 @@ from sql_dependant.sql_connection import sqlconn
 from sql_dependant.sql_write import  Delete, Update
 from pydantic import BaseModel, EmailStr, Field
 from utils import check_auth, decode_jwt_token, generate_jwt_token,generate_hash, is_valid_username
-from helpers import profile_photos_dir,flask_dir
+from helpers import profile_photos_dir,flask_dir,js_dir
 
 class UserInfo(BaseModel):
     username: str
@@ -386,6 +386,17 @@ async def api_serve_static_profile_picture(picture_name:str):
         return FileResponse(file_path)
     else:
         return JSONResponse(content={"detail": "Image not found."}, status_code=404)
+
+@app.get("/api/js/{name}")
+async def api_serve_static_profile_picture(name:str):
+    if not (is_valid_username(escape(name))):#since images are saved as uuid.jpg, this is a good way to check it.
+        raise HTTPException(status_code=400, detail="This is not a valid file to read.")
+    js_name = escape(name)
+    file_path = os.path.join(flask_dir,"static",js_dir,js_name)
+    if os.path.exists(file_path):
+        return FileResponse(file_path)
+    else:
+        return JSONResponse(content={"detail": "Script not found."}, status_code=404)
 
 
 import comments_views_api,forums_views_api,posts_views_api,views_market_api

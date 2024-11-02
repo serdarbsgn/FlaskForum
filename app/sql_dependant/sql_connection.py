@@ -27,7 +27,8 @@ class sqlconn:
         try:
             self.session.execute(query)
             return True
-        except:
+        except Exception as e:
+            print(e)
             print("Error in sql query execution. query was:  " + str(query))
             return False
     

@@ -4,7 +4,9 @@ from typing import Dict, List
 import uuid
 
 from fastapi import File, HTTPException, Request, UploadFile
-from pydantic import BaseModel
+from fastapi.responses import FileResponse, JSONResponse
+from pydantic import BaseModel, conint
+from utils import is_valid_username
 from sql_dependant.sql_read import Select
 from sql_dependant.sql_tables import Cart, Forum, Order, Product,OrderItem, ProductForum
 from sql_dependant.sql_connection import sqlconn
@@ -87,58 +89,55 @@ class ProductsResponse(BaseModel):
 def api_market():
     with sqlconn() as sql:
         products = listify(sql.session.execute(Select.products()).mappings().fetchall())
-        for product in products:
-            product["image"] = os.path.join(product_photos_dir,product["image"])
+        # for product in products:
+        #     product["image"] = os.path.join(product_photos_dir,product["image"])
         return ProductsResponse(products=products)
-
-class ARCartInfo(BaseModel):
-    product_id : int
-
-@app.post('/api/add-to-cart')
-def api_add_to_cart(request:Request,add_to_cart_info:ARCartInfo):
-    auth_check = check_auth(request)
     
+@app.post('/api/cart/{product_id}')
+def api_add_to_cart(request:Request,product_id:int,quantity:int = 1):
+    if quantity<1:
+        raise HTTPException(status_code=422, detail="Negative or 0 value for quantity is not accepted.")
+    auth_check = check_auth(request)
     with sqlconn() as sql:
         user =  auth_check["user"]
-        check = sql.session.execute(Select.cart({"user":user})).fetchall()
+        check = sql.session.execute(Select.cart({"user":user})).mappings().fetchone()
         if len(check)==0:
             cart = Cart(
                 user_id = user
             )
             sql.session.add(cart)
             sql.session.commit()
-        check = sql.session.execute(Select.cart({"user":user})).fetchall()
-        sql.execute(Insert.cart_item({"cart_id":check[0]["id"],"product_id":add_to_cart_info.product_id}))
+            check = sql.session.execute(Select.cart({"user":user})).mappings().fetchone()
+        sql.execute(Insert.cart_item({"cart_id":check["id"],"product_id":product_id,"quantity":quantity}))
         sql.session.commit()
         return MsgResponse(msg="Product added to your cart successfully!")
 
 
-@app.post('/api/remove-from-cart')
-def api_remove_from_cart(request:Request,remove_from_cart_info:ARCartInfo):
+@app.delete('/api/cart/{product_id}')
+def api_remove_from_cart(request:Request,product_id:int):
     auth_check = check_auth(request)
     with sqlconn() as sql:
         user =  auth_check["user"]
-        check = sql.session.execute(Select.cart({"user":user})).fetchall()
+        check = sql.session.execute(Select.cart({"user":user})).mappings().fetchall()
         if len(check)==0:
             return "This is wrong and its all your fault",400 
-        sql.execute(Delete.cart_item({"cart_id":check[0]["id"],"product_id":remove_from_cart_info.product_id}))
+        sql.execute(Delete.cart_item({"cart_id":check[0]["id"],"product_id":product_id}))
         sql.session.commit()
         return MsgResponse(msg="Product removed from your cart successfully!")
     
-class UpdateCartInfo(BaseModel):
-    product_id : int
-    quantity : int
-
-@app.post('/api/update-cart')
-def api_update_cart(request:Request,update_cart_info:UpdateCartInfo):
+@app.put('/api/cart/{product_id}')
+def api_update_cart(request:Request,product_id:int,quantity:int):
+    if quantity<1:
+        raise HTTPException(status_code=422, detail="Negative or 0 value for quantity is not accepted.")
+    if quantity>99:
+        raise HTTPException(status_code=422, detail="Values above 99 for quantity is not accepted.")
     auth_check = check_auth(request)
-
     with sqlconn() as sql:
         user =  auth_check["user"]
-        check = sql.session.execute(Select.cart({"user":user})).fetchall()
+        check = sql.session.execute(Select.cart({"user":user})).mappings().fetchall()
         if len(check)==0:
             raise HTTPException(status_code=400, detail="Something went wrong, have you removed your account and still trying to use the site?")
-        if sql.execute(Update.cart_item({"cart_id":check[0]["id"],"product_id":update_cart_info.product_id,"quantity":update_cart_info.quantity})):
+        if sql.execute(Update.cart_item({"cart_id":check[0]["id"],"product_id":product_id,"quantity":quantity})):
             sql.session.commit()
         return MsgResponse(msg="Updated your cart succesffully")
     
@@ -228,6 +227,18 @@ def api_checkout(request:Request):
         for item in cart_items:
             total += item["quantity"]*item["price"]
     return MsgResponse(msg=f"We got your order, total price is:{total}")
+
+@app.get("/api/product-picture/{picture_name}")
+async def api_serve_static_product_picture(picture_name:str):
+    if not (is_valid_username(escape(picture_name))):#since images are saved as uuid.jpg, this is a good way to check it.
+        raise HTTPException(status_code=400, detail="This is not a valid file to read.")
+    pic_name = escape(picture_name)
+    file_path = os.path.join(flask_dir,"static",product_photos_dir,pic_name)
+    if os.path.exists(file_path):
+        return FileResponse(file_path)
+    else:
+        return JSONResponse(content={"detail": "Image not found."}, status_code=404)
+
 
 def listify(map):
     templist = []

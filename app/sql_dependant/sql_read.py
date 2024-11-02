@@ -50,7 +50,7 @@ class Select():
         return select(User.profile_picture).where(User.username == data["user"])
     
     def forums(data):
-        statement = select(Forum.id,Forum.name,Forum.description,Forum.created_at).limit(5).offset(data*5)
+        statement = select(Forum.id,Forum.name,Forum.description,Forum.created_at).limit(10).offset(data*10)
         return statement
     
     def forums_count():

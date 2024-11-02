@@ -38,9 +38,11 @@ async def api_forum_page(forum_id:int ,page: int = Query(0, description="Page nu
     pagenumber = page
     with sqlconn() as sql:
         contents = sql.session.execute(Select.forum_page(id)).mappings().fetchone()
+        if not contents:
+            raise HTTPException(status_code=404, detail="Forum does not exist.")
         posts = listify(sql.session.execute(Select.posts({"id":id,"page":pagenumber})).mappings().fetchall())
         postcount = sql.session.execute(Select.posts_count(id)).mappings().fetchone()
-        postcount = (postcount["count"]-1)//10
+        postcount = (postcount["count"]-1)//10+1
         return ForumPageResponse(
             contents=contents,
             posts=posts,
@@ -67,7 +69,7 @@ async def api_forums_page(page: int = Query(0, description="Page number for pagi
     with sqlconn() as sql:
         forums = listify(sql.session.execute(Select.forums(pagenumber)).mappings().fetchall())
         forumcount = sql.session.execute(Select.forums_count()).mappings().fetchone()
-        forumcount = (forumcount["count"]-1)//5
+        forumcount = (forumcount["count"]-1)//10+1
         return ForumsPageResponse(forums=forums,page_count=forumcount)
     
 class ForumCreateInfo(BaseModel):

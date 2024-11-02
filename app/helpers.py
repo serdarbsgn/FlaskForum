@@ -3,6 +3,7 @@ project_dir = os.path.dirname(os.path.abspath(__file__))
 flask_dir = os.path.abspath(os.path.join(project_dir, '..', '..', 'FlaskForum', 'app'))
 profile_photos_dir = "photos/users"
 product_photos_dir = "photos/products"
+js_dir = "js"
 
 def listify(map):
     templist = []

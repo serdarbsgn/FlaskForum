@@ -9,8 +9,9 @@ class Insert():
     def user(data):
         statement = insert(data)
         return statement
+    
     def cart_item(data):
-        statement = insert(CartItem).values(cart_id=data["cart_id"],product_id=data["product_id"],quantity=1).on_duplicate_key_update(quantity=CartItem.quantity+1)
+        statement = insert(CartItem).values(cart_id=data["cart_id"],product_id=data["product_id"],quantity=data["quantity"]).on_duplicate_key_update(quantity=func.least(CartItem.quantity+data["quantity"],99))
         return statement
  
     
