@@ -191,7 +191,7 @@ async def api_register_post(token_validity: Dict[str, Any] = Depends(validate_re
 class UsernameInfo(BaseModel):
     username: str = Field(min_length=4, max_length=20)
 
-@app.post('/api/change-username',
+@app.put('/api/username',
         summary="Change username",
         description="This endpoint is for changing username.",
         responses={
@@ -211,9 +211,9 @@ class UsernameInfo(BaseModel):
 async def api_change_username(request:Request,username_info:UsernameInfo):
     auth_check = check_auth(request)
     with sqlconn() as sql:
-        if not (is_valid_username(escape(request.json["username"]))):
+        if not (is_valid_username(escape(username_info.username))):
             raise HTTPException(status_code=400, detail="Supply a valid username(Allowed special characters are -_.)")
-        check = sql.session.execute(Select.user_unique_username({"username":escape(request.json["username"])})).mappings().fetchall()
+        check = sql.session.execute(Select.user_unique_username({"username":escape(username_info.username)})).mappings().fetchall()
         if len(check)>0:
             raise HTTPException(status_code=400, detail="Requested username already exists")
         
@@ -225,7 +225,7 @@ class PasswordChangeInfo(BaseModel):
     current_password: str = Field(min_length=8, max_length=20)
     new_password: str = Field(min_length=8, max_length=20)
 
-@app.post('/api/change-password')
+@app.put('/api/password')
 async def api_change_password(request:Request,password_info:PasswordChangeInfo):
     auth_check = check_auth(request)
     with sqlconn() as sql:
@@ -375,7 +375,7 @@ async def api_remove_profile_picture(request:Request):
         except Exception as e:
             logging.warn(e)
         return MsgResponse(msg="Removed profile picture successfully.")
-    
+
 @app.get("/api/profile-picture/{picture_name}")
 async def api_serve_static_profile_picture(picture_name:str):
     if not (is_valid_username(escape(picture_name))):#since images are saved as uuid.jpg, this is a good way to check it.
