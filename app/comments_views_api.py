@@ -40,7 +40,6 @@ async def api_delete_comment(request:Request,comment_id: int):
     auth_check = check_auth(request)
     user_id = auth_check["user"]
     comment_id = comment_id
-    print(comment_id)
     with sqlconn() as sql:
         check_comment_exists = sql.session.execute(Select.comment(comment_id)).mappings().fetchone()
         if not check_comment_exists:
