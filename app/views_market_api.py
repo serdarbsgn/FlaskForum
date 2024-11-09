@@ -100,15 +100,15 @@ def api_add_to_cart(request:Request,product_id:int,quantity:int = 1):
     auth_check = check_auth(request)
     with sqlconn() as sql:
         user =  auth_check["user"]
-        check = sql.session.execute(Select.cart({"user":user})).mappings().fetchone()
+        check = sql.session.execute(Select.cart({"user":user})).mappings().fetchall()
         if len(check)==0:
             cart = Cart(
                 user_id = user
             )
             sql.session.add(cart)
             sql.session.commit()
-            check = sql.session.execute(Select.cart({"user":user})).mappings().fetchone()
-        sql.execute(Insert.cart_item({"cart_id":check["id"],"product_id":product_id,"quantity":quantity}))
+            check = [{"id":cart.id}]
+        sql.execute(Insert.cart_item({"cart_id":check[0]["id"],"product_id":product_id,"quantity":quantity}))
         sql.session.commit()
         return MsgResponse(msg="Product added to your cart successfully!")
 
