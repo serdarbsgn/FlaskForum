@@ -48,14 +48,14 @@ async def api_post_page(request:Request,post_id:int):
     
 class CreatePostInfo(BaseModel):
     forum_id : int
-    title : str = Field(min_length=4)
+    title : str = Field(min_length=4,max_length=255)
     content : str = Field(min_length=4)
 
 @app.post('/api/post')
 async def api_create_post(request:Request,create_post_info:CreatePostInfo):
     auth_check = check_auth(request)
     forum_id = create_post_info.forum_id
-    title=escape(create_post_info.title)
+    title=escape(create_post_info.title)[:255]
     content=limit_line_breaks(escape(create_post_info.content),63)
     with sqlconn() as sql:
         post = Post(
@@ -93,7 +93,7 @@ async def api_delete_post(request:Request,post_id:int):
             raise HTTPException(status_code=404, detail="You can't delete what doesn't exist.")
         if not (check_post_exists["user_id"] == auth_check["user"]):
             raise HTTPException(status_code=401, detail="You can't delete a post someone else created.")
-        sql.session.execute(Delete.post({"user_id":auth_check["user"],"post_id":escape(request.json["post_id"])}))
+        sql.session.execute(Delete.post({"user_id":auth_check["user"],"post_id":post_id}))
         sql.session.commit()
         return MsgResponse(msg="Deleted post")
 

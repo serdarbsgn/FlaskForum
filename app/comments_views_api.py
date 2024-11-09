@@ -16,6 +16,9 @@ class CreateCommentInfo(BaseModel):
     post_id: int
     content: str = Field(min_length=4)
 
+class MsgResponseWithID(BaseModel):
+    msg : str
+    id:int
 @app.post('/api/post/comment')
 async def api_create_comment(request:Request,create_comment_info:CreateCommentInfo):
     auth_check = check_auth(request)
@@ -30,7 +33,7 @@ async def api_create_comment(request:Request,create_comment_info:CreateCommentIn
             content=content)
         sql.session.add(comment)
         sql.session.commit()
-        return MsgResponse(msg="Comment created successfully")
+        return MsgResponseWithID(msg="Comment created successfully",id = comment.id)
 
 class CommentInfo(BaseModel):
     comment_id: int
