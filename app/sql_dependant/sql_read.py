@@ -105,13 +105,15 @@ class Select():
         return select(Cart.id).where(Cart.user_id == data["user"])
     
     def cart_item(data):
-        statement = select(CartItem.id,CartItem.cart_id,CartItem.product_id,CartItem.quantity,Product.name,Product.price).join(
+        statement = select(CartItem.id,CartItem.cart_id,CartItem.product_id,CartItem.quantity,Product.name,Product.price,ProductForum.forum_id).join(
+        ProductForum, CartItem.product_id == ProductForum.product_id).join(
         Product, CartItem.product_id == Product.id).where(
         CartItem.cart_id == select(Cart.id).where(Cart.user_id == data["user"]).scalar_subquery())
         return statement
     
     def order_item(data):
-        statement = select(OrderItem.id,OrderItem.order_id,OrderItem.product_id,OrderItem.quantity,Product.name,Product.price).join(
+        statement = select(OrderItem.id,OrderItem.order_id,OrderItem.product_id,OrderItem.quantity,Product.name,Product.price,ProductForum.forum_id).join(
+        ProductForum, OrderItem.product_id == ProductForum.product_id).join(
         Product, OrderItem.product_id == Product.id).where(
         OrderItem.order_id.in_(select(Order.id).where(Order.user_id == data["user"]).scalar_subquery())).order_by(OrderItem.order_id)
         return statement

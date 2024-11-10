@@ -5,7 +5,7 @@ import uuid
 
 from fastapi import File, HTTPException, Request, UploadFile
 from fastapi.responses import FileResponse, JSONResponse
-from pydantic import BaseModel, conint
+from pydantic import BaseModel
 from utils import is_valid_username
 from sql_dependant.sql_read import Select
 from sql_dependant.sql_tables import Cart, Forum, Order, Product,OrderItem, ProductForum
@@ -23,6 +23,7 @@ class OrderResponse(BaseModel):
     quantity : int
     name : str
     price : Decimal
+    forum_id : int
 
 class OrdersResponse(BaseModel):
     orders: Dict[int, List[OrderResponse]]
@@ -51,6 +52,7 @@ class CartItemResponse(BaseModel):
     quantity : int
     name : str
     price : Decimal
+    forum_id : int
 
 class CartResponse(BaseModel):
     cart_items: List[CartItemResponse]
