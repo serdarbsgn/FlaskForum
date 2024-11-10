@@ -2,7 +2,8 @@ from html import escape
 import io
 import os
 import uuid
-from views_api import TokenResponse
+
+from pydantic import BaseModel
 from sql_dependant.sql_connection import sqlconn
 from sql_dependant.sql_read import Select
 from sql_dependant.sql_tables import User
@@ -17,13 +18,19 @@ from uuid import uuid4
 from helpers import flask_dir,profile_photos_dir
 from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi import Query
-
+from urllib.parse import urlparse
 callbackurl = "https://serdarbisgin.com.tr/callback"#This'll redirect to frontend, which'll communicate with /api/callback
 
+class TokenResponse(BaseModel):
+    token: str
+    caller_path:str
+
 @app.get("/api/google-register")
-def google_sign_in():
+def google_sign_in(url: str = Query(..., description="Return url after login")):
+    parsed_url = urlparse(url)
+    sanitized_url = parsed_url.path
     expire_at = str(datetime.datetime.now()+relativedelta(minutes=4))
-    state = utils.generate_jwt_token({"expire_at":expire_at,"token":str(uuid4())})
+    state = utils.generate_jwt_token({"expire_at":expire_at,"token":str(uuid4()),"caller_path":sanitized_url})
     r_url = f'https://accounts.google.com/o/oauth2/auth?client_id={env_init.CLIENT_ID}&redirect_uri={callbackurl}&state={state}&response_type=code&scope=profile+email'
     return RedirectResponse(url=r_url)
 
@@ -70,7 +77,7 @@ async def google_callback(
             if exists:
                 expire_at = str(datetime.datetime.now()+relativedelta(hours=4))
                 auth_jwt_token = utils.generate_jwt_token({"expire_at":expire_at,"user":exists["id"]})
-                return TokenResponse(token = auth_jwt_token)
+                return TokenResponse(token = auth_jwt_token,caller_path=state["caller_path"])
             return JSONResponse(content={"detail": "Something went wrong."}, status_code=400)
     else:
         return "User email not available or not verified by Google.", 400
