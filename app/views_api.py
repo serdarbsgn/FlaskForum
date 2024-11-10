@@ -373,7 +373,7 @@ async def api_remove_profile_picture(request:Request):
         except FileNotFoundError:
             pass
         except Exception as e:
-            logging.warn(e)
+            logging.warning(e)
         return MsgResponse(msg="Removed profile picture successfully.")
 
 @app.get("/api/profile-picture/{picture_name}")
@@ -399,4 +399,4 @@ async def api_serve_static_profile_picture(name:str):
         return JSONResponse(content={"detail": "Script not found."}, status_code=404)
 
 
-import comments_views_api,forums_views_api,posts_views_api,views_market_api
+import comments_views_api,forums_views_api,posts_views_api,views_market_api,views_google_oauth_api
