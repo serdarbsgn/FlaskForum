@@ -18,16 +18,16 @@ from helpers import flask_dir,profile_photos_dir
 from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi import Query
 
-callbackurl = "https://serdarbisgin.com.tr/api/callback"
+callbackurl = "https://serdarbisgin.com.tr/callback"#This'll redirect to frontend, which'll communicate with /api/callback
 
-@app.get("/google-register")
+@app.get("/api/google-register")
 def google_sign_in():
     expire_at = str(datetime.datetime.now()+relativedelta(minutes=4))
     state = utils.generate_jwt_token({"expire_at":expire_at,"token":str(uuid4())})
     r_url = f'https://accounts.google.com/o/oauth2/auth?client_id={env_init.CLIENT_ID}&redirect_uri={callbackurl}&state={state}&response_type=code&scope=profile+email'
     return RedirectResponse(url=r_url)
 
-@app.get("/callback")
+@app.get("/api/callback")
 async def google_callback(
     state: str = Query(..., description="State parameter from Google OAuth callback"),
     code: str = Query(..., description="Authorization code from Google OAuth callback")
