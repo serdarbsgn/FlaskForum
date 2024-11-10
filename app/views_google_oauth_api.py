@@ -60,7 +60,7 @@ async def google_callback(
         with sqlconn() as sql:
             exists = sql.session.execute(Select.user_oauth2_email_exists(g_user_data)).mappings().fetchone()
             if not exists:
-                if google_register_func(g_user_data):
+                if await google_register_func(g_user_data):
                     pass
                 else:
                     sql.close()
