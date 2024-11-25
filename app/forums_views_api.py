@@ -3,12 +3,12 @@ from html import escape
 from typing import List, Optional
 from fastapi import HTTPException, Query, Request
 from pydantic import BaseModel, Field
-from sql_dependant.sql_read import Select
-from sql_dependant.sql_tables import  Forum
-from sql_dependant.sql_connection import sqlconn
-from views_api import MsgResponse, check_auth
-from main import app
-from helpers import limit_line_breaks, listify
+from .sql_dependant.sql_read import Select
+from .sql_dependant.sql_tables import  Forum
+from .sql_dependant.sql_connection import sqlconn
+from .views_api import MsgResponse, check_auth
+from .main import app
+from .helpers import limit_line_breaks, listify
 from datetime import datetime
 
 class ForumContentsResponse(BaseModel):

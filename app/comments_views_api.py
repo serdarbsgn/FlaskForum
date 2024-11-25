@@ -1,13 +1,13 @@
 from html import escape
 from typing import Optional,List
 from fastapi import HTTPException, Request
-from sql_dependant.sql_read import Select
-from sql_dependant.sql_tables import Comment, CommentLikes
-from sql_dependant.sql_connection import sqlconn
-from sql_dependant.sql_write import Delete, Update
-from views_api import check_auth,MsgResponse
-from main import app
-from helpers import limit_line_breaks, listify
+from .sql_dependant.sql_read import Select
+from .sql_dependant.sql_tables import Comment, CommentLikes
+from .sql_dependant.sql_connection import sqlconn
+from .sql_dependant.sql_write import Delete, Update
+from .views_api import check_auth,MsgResponse
+from .main import app
+from .helpers import limit_line_breaks, listify
 from pydantic import BaseModel, EmailStr, Field
 from datetime import datetime
 

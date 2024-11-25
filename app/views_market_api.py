@@ -6,15 +6,15 @@ import uuid
 from fastapi import File, HTTPException, Request, UploadFile
 from fastapi.responses import FileResponse, JSONResponse
 from pydantic import BaseModel
-from utils import is_valid_username
-from sql_dependant.sql_read import Select
-from sql_dependant.sql_tables import Cart, Forum, Order, Product,OrderItem, ProductForum
-from sql_dependant.sql_connection import sqlconn
-from sql_dependant.sql_write import Insert,Delete, Update
-from views_api import MsgResponse, check_auth
-from main import app
+from .utils import is_valid_username
+from .sql_dependant.sql_read import Select
+from .sql_dependant.sql_tables import Cart, Forum, Order, Product,OrderItem, ProductForum
+from .sql_dependant.sql_connection import sqlconn
+from .sql_dependant.sql_write import Insert,Delete, Update
+from .views_api import MsgResponse, check_auth
+from .main import app
 from PIL import Image
-from helpers import *
+from .helpers import *
 
 class OrderResponse(BaseModel):
     id : int

@@ -4,18 +4,18 @@ import os
 import uuid
 
 from pydantic import BaseModel
-from sql_dependant.sql_connection import sqlconn
-from sql_dependant.sql_read import Select
-from sql_dependant.sql_tables import User
-from sql_dependant.sql_write import Update
-from sql_dependant import env_init
+from .sql_dependant.sql_connection import sqlconn
+from .sql_dependant.sql_read import Select
+from .sql_dependant.sql_tables import User
+from .sql_dependant.sql_write import Update
+from .sql_dependant import env_init
 import requests
-from main import app
+from .main import app
 import datetime
 from dateutil.relativedelta import relativedelta
-import utils
+from . import utils
 from uuid import uuid4
-from helpers import flask_dir,profile_photos_dir
+from .helpers import flask_dir,profile_photos_dir
 from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi import Query
 from urllib.parse import urlparse

@@ -2,7 +2,7 @@ from datetime import datetime
 import re
 from fastapi import HTTPException
 import jwt
-from sql_dependant.env_init import JWT_SECRET_KEY,PASSWORD_SALT
+from .sql_dependant.env_init import JWT_SECRET_KEY,PASSWORD_SALT
 from hashlib import pbkdf2_hmac
 
 def decode_jwt_token(encoded_content):

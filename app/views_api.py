@@ -6,17 +6,17 @@ from typing import Any, Dict
 import uuid
 
 from fastapi.responses import FileResponse, JSONResponse
-from main import app
+from .main import app
 from fastapi import Depends, File, HTTPException, Request, UploadFile
 from dateutil.relativedelta import relativedelta
 from PIL import Image
-from sql_dependant.sql_read import Select
-from sql_dependant.sql_tables import   User
-from sql_dependant.sql_connection import sqlconn
-from sql_dependant.sql_write import  Delete, Update
+from .sql_dependant.sql_read import Select
+from .sql_dependant.sql_tables import   User
+from .sql_dependant.sql_connection import sqlconn
+from .sql_dependant.sql_write import  Delete, Update
 from pydantic import BaseModel, EmailStr, Field
-from utils import check_auth, decode_jwt_token, generate_jwt_token,generate_hash, is_valid_username
-from helpers import profile_photos_dir,flask_dir,js_dir
+from .utils import check_auth, decode_jwt_token, generate_jwt_token,generate_hash, is_valid_username
+from .helpers import profile_photos_dir,flask_dir,js_dir
 
 class UserInfo(BaseModel):
     username: str
@@ -399,4 +399,4 @@ async def api_serve_static_profile_picture(name:str):
         return JSONResponse(content={"detail": "Script not found."}, status_code=404)
 
 
-import comments_views_api,forums_views_api,posts_views_api,views_market_api,views_google_oauth_api
+from . import comments_views_api,forums_views_api,posts_views_api,views_market_api,views_google_oauth_api

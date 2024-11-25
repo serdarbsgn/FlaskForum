@@ -2,13 +2,13 @@ from datetime import datetime
 from html import escape
 from fastapi import HTTPException, Request
 from pydantic import BaseModel, Field
-from helpers import limit_line_breaks
-from sql_dependant.sql_read import Select
-from sql_dependant.sql_tables import  Post, PostLikes
-from sql_dependant.sql_connection import sqlconn
-from sql_dependant.sql_write import Update,Delete
-from views_api import MsgResponse, check_auth
-from main import app
+from .helpers import limit_line_breaks
+from .sql_dependant.sql_read import Select
+from .sql_dependant.sql_tables import  Post, PostLikes
+from .sql_dependant.sql_connection import sqlconn
+from .sql_dependant.sql_write import Update,Delete
+from .views_api import MsgResponse, check_auth
+from .main import app
 
 class PostContentsResponse(BaseModel):
     id : int

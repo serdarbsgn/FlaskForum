@@ -1,7 +1,7 @@
 import uuid
 from sqlalchemy import  delete, func, select, update,desc,not_
 from sqlalchemy.dialects.mysql import insert
-from sql_dependant.sql_tables import *
+from ..sql_dependant.sql_tables import *
 from sqlalchemy.sql.functions import coalesce,concat,count
 
 class Insert():
