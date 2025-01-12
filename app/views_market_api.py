@@ -1,12 +1,12 @@
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 from html import escape
 from typing import Dict, List
 import uuid
 
-from fastapi import File, HTTPException, Request, UploadFile
+from fastapi import Depends, File, Form, HTTPException, Request, UploadFile
 from fastapi.responses import FileResponse, JSONResponse
 from pydantic import BaseModel
-from .utils import is_valid_username
+from .utils import check_file_size, is_valid_username
 from .sql_dependant.sql_read import Select
 from .sql_dependant.sql_tables import Cart, Forum, Order, Product,OrderItem, ProductForum
 from .sql_dependant.sql_connection import sqlconn
@@ -143,19 +143,18 @@ def api_update_cart(request:Request,product_id:int,quantity:int):
             sql.session.commit()
         return MsgResponse(msg="Updated your cart succesffully")
     
-class AddProductInfo(BaseModel):
-    name : str
-    description : str
-    price : Decimal
-
 @app.post('/api/add-product')
-async def api_add_product(request:Request,add_product_info:AddProductInfo,file: UploadFile = File(...)):
+async def api_add_product(request:Request,file: UploadFile = Depends(check_file_size), name: str = Form(...),description: str = Form(...),price: Decimal = Form(...)):
     check_auth(request)
-
+    try:
+        validated_price = Decimal(price)
+        if len(validated_price.as_tuple().digits) + validated_price.as_tuple().exponent > 8:
+            raise HTTPException(status_code=400, detail="This is not a valid price, exceeds integer limit (8)")
+    except InvalidOperation:
+        raise HTTPException(status_code=400, detail="This is not a valid price")
     with sqlconn() as sql:
         rand= "p-"+str(uuid.uuid4())+".jpg"
         filepath = os.path.join(flask_dir,"static",product_photos_dir,rand)
-        file = request.files['file']
         with open(filepath, "wb") as buffer:
             buffer.write(await file.read())
         try:
@@ -166,15 +165,15 @@ async def api_add_product(request:Request,add_product_info:AddProductInfo,file: 
             os.remove(filepath)
             raise HTTPException(status_code=400, detail="This is not a valid image")
         product = Product(
-            name = escape(add_product_info.name),
-            description = limit_line_breaks(escape(add_product_info.description),31),
-            price = Decimal(escape(add_product_info.price)),
+            name = escape(name),
+            description = limit_line_breaks(escape(description),31),
+            price = validated_price,
             image = rand
         )
         sql.session.add(product)
         sql.commit()
         product_id = sql.session.execute(Select.product_id_from_photo({"image":rand})).fetchone()[0]
-        check = sql.session.execute(Select.forum_exists(escape("Product: " + request.form["name"]))).mappings().fetchall()
+        check = sql.session.execute(Select.forum_exists(escape("Product: " + name))).mappings().fetchall()
         if len(check)>0:
             product_forum_mapping = ProductForum(
                 product_id = product_id,
@@ -185,11 +184,11 @@ async def api_add_product(request:Request,add_product_info:AddProductInfo,file: 
             return MsgResponse(msg="Product already has a forum and product added successfully")
         else:
             product_forum = Forum(
-            name=escape("Product: " + request.form["name"]),
-            description=limit_line_breaks(escape(request.form["description"]),31))
+            name=escape("Product: " + name),
+            description=limit_line_breaks(escape(description),31))
             sql.session.add(product_forum)
             sql.commit()
-            forumid = sql.session.execute(Select.forum_exists(escape("Product: " + request.form["name"]))).fetchone()[0]
+            forumid = sql.session.execute(Select.forum_exists(escape("Product: " + name))).fetchone()[0]
             product_forum_mapping = ProductForum(
                 product_id = product_id,
                 forum_id = forumid

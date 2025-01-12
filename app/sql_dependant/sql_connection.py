@@ -17,8 +17,7 @@ class sqlconn:
         engine = sql_engine
         connection = engine.connect()
         connection = connection.execution_options(
-        stream_results=True,
-        isolation_level="READ UNCOMMITTED"
+        stream_results=True
 )
         self.session = Session(engine)
         self.connection = connection

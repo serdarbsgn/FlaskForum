@@ -13,7 +13,7 @@ from sqlalchemy.pool import NullPool
 from .sql_dependant import env_init
 sql_engine = sqlalchemy.create_engine(
                 "mysql://"+env_init.MYSQL_USER+":"+env_init.MYSQL_PASSWORD+"@localhost/"+env_init.MYSQL_DB,
-                isolation_level="READ UNCOMMITTED",poolclass=NullPool
+                isolation_level="READ COMMITTED",poolclass=NullPool
                 )
 
 from . import views_api

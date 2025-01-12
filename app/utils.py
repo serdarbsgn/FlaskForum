@@ -1,9 +1,11 @@
 from datetime import datetime
 import re
-from fastapi import HTTPException
+from fastapi import HTTPException, UploadFile
 import jwt
 from .sql_dependant.env_init import JWT_SECRET_KEY,PASSWORD_SALT
 from hashlib import pbkdf2_hmac
+
+MAX_UPLOAD_SIZE = 20*1024*1024+1
 
 def decode_jwt_token(encoded_content):
     try:
@@ -16,6 +18,11 @@ def generate_jwt_token(content):
     encoded_content = jwt.encode(content, JWT_SECRET_KEY, algorithm="HS256")
     token = str(encoded_content)
     return token
+
+async def check_file_size(file: UploadFile):
+    if file.size > MAX_UPLOAD_SIZE:
+        raise HTTPException(status_code=413, detail="File too large.")
+    return file
 
 def generate_hash(plain_password, password_salt=PASSWORD_SALT):
     password_hash = pbkdf2_hmac(
