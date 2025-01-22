@@ -5,9 +5,9 @@ import os
 from typing import Any, Dict
 import uuid
 
-from fastapi.responses import FileResponse, JSONResponse, PlainTextResponse
+from fastapi.responses import FileResponse, JSONResponse
 from .main import app
-from fastapi import Depends, File, HTTPException, Request, UploadFile
+from fastapi import Depends, File, HTTPException, Request, Response, UploadFile
 from dateutil.relativedelta import relativedelta
 from PIL import Image
 from .sql_dependant.sql_read import Select
@@ -398,8 +398,9 @@ async def api_serve_static_profile_picture(name:str):
     else:
         return JSONResponse(content={"detail": "Script not found."}, status_code=404)
 
-@app.get("/app-ads.txt", response_class=PlainTextResponse)
+@app.get("/app-ads.txt")
 def app_ads():
-    return "google.com, pub-1865435754692102, DIRECT, f08c47fec0942fa0"
+    content = "google.com, pub-1865435754692102, DIRECT, f08c47fec0942fa0"
+    return Response(content, media_type="text/plain")
 
 from . import comments_views_api,forums_views_api,posts_views_api,views_market_api,views_google_oauth_api
